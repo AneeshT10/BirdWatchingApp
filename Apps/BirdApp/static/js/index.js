@@ -11,7 +11,7 @@ app.data = {
             // Complete as you see fit.
             map: null,
             my_value: 1,
-            show_stat_button: false // This is an example.
+             // This is an example.
         };
     },
     methods: {
@@ -55,7 +55,7 @@ app.init = () => {
     app.map.locate({setView: true, maxZoom: 13});
 
     app.map.on('locationfound', function(e){
-        L.marker(e.latlng).addTo(app.map)
+        // L.marker(e.latlng).addTo(app.map)
             // .bindPopup("You are located here!").openPopup();
     });
     app.map.on('locationerror', function(e){
@@ -75,7 +75,7 @@ app.init = () => {
             polyline: false,
             polygon: false,
             circle: false,
-            marker: false,
+            marker: true,
             rectangle: true
         }
     });
@@ -92,6 +92,15 @@ app.init = () => {
             layer.on('click', function() { 
                 layer.openPopup();
                 document.getElementById('stats-button').layer = layer;
+            });
+        }
+        if (type === "marker") {
+            var popupContent = '<button class="button"id="checklist">Enter checklist</button>';
+            var popup = L.popup().setContent(popupContent);
+            layer.bindPopup(popup);
+            layer.on('click', function() { 
+                layer.openPopup();
+                document.getElementById('checklist').layer = layer;
             });
         }
     
@@ -128,7 +137,7 @@ document.addEventListener('click', function(e) {
             // ...
 
             //redirect
-            window.location.href = '/BirdApp/statistics?' +
+            window.location.href = '/BirdApp/location?' +
                 'swLat=' + southWest.lat + '&swLng=' + southWest.lng +
                 '&nwLat=' + northWest.lat + '&nwLng=' + northWest.lng +
                 '&neLat=' + northEast.lat + '&neLng=' + northEast.lng +
@@ -136,6 +145,25 @@ document.addEventListener('click', function(e) {
         }
 
         
+
+    }
+});
+document.addEventListener('click', function(e) {
+    if (e.target.id === 'checklist') {
+        console.log("Button clicked");
+        // Get the layer of the clicked button
+        var layer = e.target.layer
+        console.log(layer);
+        if (layer) {
+            // Get the LatLng of position
+            var bounds = layer.getLatLng();
+            var lat = bounds.lat;
+            var lng = bounds.lng;
+            //redirect
+            window.location.href = '/BirdApp/checklist?' +
+                'lat=' + lat + 'Lng=' + lng ;
+        }
+
 
     }
 });

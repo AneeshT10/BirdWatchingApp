@@ -41,10 +41,11 @@ def index():
         my_callback_url = URL('my_callback', signer=url_signer),
     )
 
-@action('statistics')
+@action('location')
 #@action('statistics?<swLat:float>&<swLng:float>&<nwLat:float>&<nwLng:float>&<neLat:float>&<neLng:float>&<seLat:float>&<seLng:float>')
-@action.uses('statistics.html', db, auth, url_signer)
+@action.uses('location.html', db, auth.user, url_signer)
 def statistics():
+    #Loaded rectangle region
     swLat = float(request.params.get('swLat'))
     swLng = float(request.params.get('swLng'))
     nwLat = float(request.params.get('nwLat'))
@@ -53,6 +54,10 @@ def statistics():
     neLng = float(request.params.get('neLng'))
     seLat = float(request.params.get('seLat'))
     seLng = float(request.params.get('seLng'))
+
+    #Filter Stats located in this region
+    
+
     return dict(
         # COMPLETE: return here any signed URLs you need.
         my_callback_url = URL('my_callback', signer=url_signer),
@@ -65,6 +70,14 @@ def statistics():
         seLat = seLat,
         seLng = seLng
             
+    )
+
+@action("checklist")
+@action.uses('checklist.html', db, auth.user, url_signer)
+def checklist():
+    return dict(
+        # COMPLETE: return here any signed URLs you need.
+        my_callback_url = URL('my_callback', signer=url_signer),
     )
 
 @action('my_callback')

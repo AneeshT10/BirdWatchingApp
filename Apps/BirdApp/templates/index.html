@@ -8,19 +8,22 @@
     height: 650px; 
     width: 100%; 
   }
+.button-spacing {
+  margin-right: 10px;
+}
 </style>
 
 
 <div class="section" id="app" v-cloak>
   <!-- Put here your Vue.js template -->
-  <h1 class="title"><i class="fa-solid fa-cube"></i> Bird Map</h1>
+  <h1 class="title">🐦Bird Watching Map</h1>
 
   <div class="field">
     <div class="control">
       <input class="input" type="text" placeholder="Search...">
     </div>
   </div>
-  <button class="button" v-show="show_stat_button">Statistics on selected region</button>
+  <button class="button is-primary">My Birding</button>
   <div class="map">
     <div id="map"></div>
   </div>
