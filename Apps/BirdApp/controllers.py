@@ -41,6 +41,32 @@ def index():
         my_callback_url = URL('my_callback', signer=url_signer),
     )
 
+@action('statistics')
+#@action('statistics?<swLat:float>&<swLng:float>&<nwLat:float>&<nwLng:float>&<neLat:float>&<neLng:float>&<seLat:float>&<seLng:float>')
+@action.uses('statistics.html', db, auth, url_signer)
+def statistics():
+    swLat = float(request.params.get('swLat'))
+    swLng = float(request.params.get('swLng'))
+    nwLat = float(request.params.get('nwLat'))
+    nwLng = float(request.params.get('nwLng'))
+    neLat = float(request.params.get('neLat'))
+    neLng = float(request.params.get('neLng'))
+    seLat = float(request.params.get('seLat'))
+    seLng = float(request.params.get('seLng'))
+    return dict(
+        # COMPLETE: return here any signed URLs you need.
+        my_callback_url = URL('my_callback', signer=url_signer),
+        swLat = swLat,
+        swLng = swLng,
+        nwLat = nwLat,
+        nwLng = nwLng,
+        neLat = neLat,
+        neLng = neLng,
+        seLat = seLat,
+        seLng = seLng
+            
+    )
+
 @action('my_callback')
 @action.uses() # Add here things like db, auth, etc.
 def my_callback():
