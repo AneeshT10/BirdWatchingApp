@@ -29,16 +29,18 @@ from py4web import action, request, abort, redirect, URL
 from yatl.helpers import A
 from .common import db, session, T, cache, auth, logger, authenticated, unauthenticated, flash
 from py4web.utils.url_signer import URLSigner
-from .models import get_user_email
+from .models import get_user_email, load_csv_files
 
 url_signer = URLSigner(session)
 
 @action('index')
 @action.uses('index.html', db, auth, url_signer)
 def index():
+    load_csv_files()
     return dict(
         # COMPLETE: return here any signed URLs you need.
         my_callback_url = URL('my_callback', signer=url_signer),
+        get_species_url = URL('get_species', signer=url_signer)
     )
 
 @action('location')
@@ -85,3 +87,18 @@ def checklist():
 def my_callback():
     # The return value should be a dictionary that will be sent as JSON.
     return dict(my_value=3)
+
+@action('get_species')
+def get_species():
+    species = db(db.species).select().as_list()
+    return dict(species=species)
+
+@action('get_sightings')
+def get_sightings():
+    sightings = db(db.sightings).select().as_list()
+    return dict(sightings=sightings)
+
+@action('get_checklists')
+def get_checklists():
+    checklists = db(db.checklists).select().as_list()
+    return dict(checklists=checklists)

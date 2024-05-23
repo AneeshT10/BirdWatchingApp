@@ -11,8 +11,19 @@ app.data = {
             // Complete as you see fit.
             map: null,
             my_value: 1,
+            searchQuery: '',
+            species: [],
+            closestMatches: [],
+            selected_bird: '',
+            showMatches: false
              // This is an example.
         };
+    },
+    watch: {
+        searchQuery: function(val) {
+          this.closestMatches = this.getClosestMatches(val);
+          this.showMatches = true;
+        }
     },
     methods: {
         // Complete as you see fit.
@@ -20,15 +31,33 @@ app.data = {
             // This is an example.
             this.my_value += 1;
         },
+        getClosestMatches: function(query) {
+            if (!query) return [];
+            let matches = this.species.filter(species => species.toLowerCase().startsWith(query.toLowerCase()));
+            return matches.slice(0, 5);
+        },
+        select_bird: function(bird) {
+            this.searchQuery = bird
+            this.$nextTick(() => {
+                this.showMatches = false;
+            });
+            this.selected_bird = bird;
+            // Now we need to display heatmap
+        }
     },
 };
 app.vue = Vue.createApp(app.data).mount("#app");
 
 app.load_data = function () {
-    axios.get(my_callback_url).then(function (r) {
-        app.vue.my_value = r.data.my_value;
+    axios.get(get_species_url).then(function (r) {
+        app.vue.species = r.data.species.map(function(bird) {
+            return bird.bird_name;
+        });
+        console.log(app.vue.species);
     });
 
+    // ...rest of your code...
+}
 
     // var map = L.map('map').setView([51.505, -0.09], 13);
 
@@ -40,7 +69,7 @@ app.load_data = function () {
     //     .bindPopup('A pretty CSS popup.<br> Easily customizable.')
     //     .openPopup();
         
-}
+
 
 app.init = () => {
     app.map = L.map('map').setView([51.505, -0.09], 13);
