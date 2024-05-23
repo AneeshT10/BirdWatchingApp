@@ -15,7 +15,8 @@ app.data = {
             species: [],
             closestMatches: [],
             selected_bird: '',
-            showMatches: false
+            showMatches: false,
+            heatmap_cords: [],
              // This is an example.
         };
     },
@@ -33,17 +34,48 @@ app.data = {
         },
         getClosestMatches: function(query) {
             if (!query) return [];
-            let matches = this.species.filter(species => species.toLowerCase().startsWith(query.toLowerCase()));
-            return matches.slice(0, 5);
+            let matches = this.species.filter(species => species.toLowerCase().includes(query.toLowerCase()));
+            return matches
         },
         select_bird: function(bird) {
-            this.searchQuery = bird
+            this.searchQuery = bird;
             this.$nextTick(() => {
                 this.showMatches = false;
             });
             this.selected_bird = bird;
-            // Now we need to display heatmap
-        }
+        
+            // Get event_ids where bird names match
+            axios.get(get_sightings_url, {
+                params: {
+                    bird_name: bird
+                }
+            }).then((response) => {
+                let event_ids = response.data.sightings.map(sighting => sighting.sampling_event_id);
+                // Get checklists where event_ids match
+                
+                axios.get(get_checklists_url, {
+                    params: {
+                        event_ids: event_ids.join(',')
+                    }
+                }).then((response2) => {
+                    console.log(event_ids);
+                    let heatmap_cords = response2.data.checklists.map(checklist => [checklist.lat, checklist.lng, 0.2]);
+                    console.log('Number of heatmap coordinates:', heatmap_cords.length);
+                    // Update heatmap
+                    app.heatmap.setLatLngs(heatmap_cords);
+                });
+            });
+        },
+        redo: function() {
+            // Get all checklists
+            axios.get(get_checklists_url).then((response) => {
+                let heatmap_cords = response.data.checklists.map(checklist => [checklist.lat, checklist.lng, 0.2]);
+                // Update heatmap
+                app.heatmap.setLatLngs(heatmap_cords);
+                // Clear selected bird
+            });
+            this.searchQuery = '';
+        },
     },
 };
 app.vue = Vue.createApp(app.data).mount("#app");
@@ -53,7 +85,14 @@ app.load_data = function () {
         app.vue.species = r.data.species.map(function(bird) {
             return bird.bird_name;
         });
-        console.log(app.vue.species);
+    });
+
+    //load data for heatmap
+    axios.get(get_checklists_url).then(function (r) {
+        app.vue.heatmap_cords = r.data.checklists.map(function(checklist) {
+            return [checklist.lat, checklist.lng, 0.2];
+        });
+        app.heatmap.setLatLngs(app.vue.heatmap_cords);
     });
 
     // ...rest of your code...
@@ -73,11 +112,13 @@ app.load_data = function () {
 
     app.init = () => {
         app.map = L.map('map');
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}{r}.png', {
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
             subdomains: 'abcd',
             maxZoom: 19
-        }).addTo(app.map);
+        }).addTo(app.map);;
+
+        
     // Adds listener.
     // app.map.on('click', app.click_listener);
     // app.map.on('dbclick', app.dbclick_listener);
@@ -95,6 +136,9 @@ app.load_data = function () {
     // Initialize the FeatureGroup to store editable layers
     var editableLayers = new L.FeatureGroup();
     app.map.addLayer(editableLayers);
+
+    // Add heatmap layer
+    app.heatmap = L.heatLayer([], {radius: 25, max: 1}).addTo(app.map);
 
     // Initialize the draw control and pass it the FeatureGroup of editable layers
     var drawControl = new L.Control.Draw({
@@ -138,6 +182,7 @@ app.load_data = function () {
         editableLayers.addLayer(layer);
     });
 };
+
 
 app.init();
 

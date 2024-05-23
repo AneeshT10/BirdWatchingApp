@@ -40,7 +40,9 @@ def index():
     return dict(
         # COMPLETE: return here any signed URLs you need.
         my_callback_url = URL('my_callback', signer=url_signer),
-        get_species_url = URL('get_species', signer=url_signer)
+        get_species_url = URL('get_species', signer=url_signer),
+        get_checklists_url = URL('get_checklists', signer=url_signer),
+        get_sightings_url = URL('get_sightings', signer=url_signer),
     )
 
 @action('location')
@@ -95,10 +97,22 @@ def get_species():
 
 @action('get_sightings')
 def get_sightings():
-    sightings = db(db.sightings).select().as_list()
+    bird_name = request.params.get('bird_name')
+    if bird_name:
+        sightings = db(db.sightings.common_name == bird_name).select().as_list()
+    else:
+        sightings = db(db.sightings).select().as_list()
     return dict(sightings=sightings)
 
 @action('get_checklists')
 def get_checklists():
-    checklists = db(db.checklists).select().as_list()
+    event_ids = request.params.get('event_ids')
+    print("EVENT ID",event_ids)
+
+    if event_ids:
+        event_ids = event_ids.split(',') # Convert to list
+        checklists = db(db.checklists.sampling_event_id.belongs(event_ids)).select().as_list()
+    else:
+        checklists = db(db.checklists).select().as_list()
+    #print("LENGTH OF CHECK",len(checklists))
     return dict(checklists=checklists)
