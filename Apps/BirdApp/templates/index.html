@@ -1,17 +1,38 @@
 [[extend 'layout.html']]
 
 <style>
-[v-cloak] {
-     display: none;
-}
-#map { 
-    height: 650px; 
-    width: 100%; 
+  [v-cloak] {
+       display: none;
   }
-.button-spacing {
-  margin-right: 10px;
-}
-</style>
+  #app {
+    padding-bottom: 300px;
+  }
+  #map { 
+      height: 650px; 
+      width: 100%; 
+      border-radius: 15px !important;
+    }
+  .button-spacing {
+    margin-right: 10px;
+  }
+  body {
+    background-color: #aaa;
+    color: #aaa;
+  }
+  .title {
+    text-align: center;
+    font-family: 'Comfortaa', sans-serif;
+  }
+  .my-birding-button {
+    background-color: #666 !important; 
+    color: #ffffff !important;
+    
+    font-family: 'Comfortaa', sans-serif;
+  }
+  .searchfield {
+    font-family: 'Comfortaa', sans-serif;
+  }
+  </style>
 
 
 <div class="section" id="app" v-cloak>
@@ -20,7 +41,7 @@
 
   <div class="field">
     <div class="control">
-      <input class="input" type="text" placeholder="Search..." v-model="searchQuery">
+      <input class="input searchfield" type="text" placeholder="Search..." v-model="searchQuery">
       <div class="field" v-for="match in closestMatches" v-show="showMatches">
         <div class="control">
           <a href="#" @click.prevent="select_bird(match)">{{ match }}</a>
@@ -29,7 +50,7 @@
     </div>
   </div>
 
-  <button class="button is-primary">My Birding</button>
+  <button class="button is-primary my-birding-button">My Birding</button>
   <div class="map">
     <div id="map"></div>
   </div>
