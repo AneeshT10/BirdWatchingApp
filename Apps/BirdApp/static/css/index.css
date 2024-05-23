@@ -1,0 +1,55 @@
+
+  [v-cloak] {
+       display: none;
+  }
+  #app {
+    padding-bottom: 300px;
+  }
+  #map { 
+      height: 650px; 
+      width: 100%; 
+      border-radius: 15px !important;
+    }
+  .button-spacing {
+    margin-right: 10px;
+  }
+  body {
+    background-color: #fff;
+    color: #aaa;
+  }
+  .title {
+    text-align: center;
+    font-family: 'Comfortaa', sans-serif;
+  }
+  .my-birding-button {
+    background-color: #fff !important; 
+    color: #000 !important;
+    font-family: 'Comfortaa', sans-serif;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+  }
+  .redo-button {
+    background-color: #fff !important; 
+    color: #000 !important;
+    justify-content: center;
+    font-family: 'Comfortaa', sans-serif;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+  }
+  .searchfield {
+    font-family: 'Comfortaa', sans-serif;
+    background-color: #fff !important;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+  }
+    .matches-list {
+    max-height: 150px; 
+    overflow-y: auto;
+    border: 1px solid #bbb; 
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2); 
+}
+.matches-list a {
+    border-radius: 3px; /* Adjust as needed */
+    display: block;
+    padding: 5px;
+    margin: 5px 0;
+    background-color: #fff; /* Adjust as needed */
+    color: #000; /* Black text */
+}
