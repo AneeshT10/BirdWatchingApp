@@ -22,8 +22,8 @@ app.data = {
     },
     watch: {
         searchQuery: function(val) {
-          this.closestMatches = this.getClosestMatches(val);
-          this.showMatches = true;
+            this.closestMatches = this.getClosestMatches(val);
+            this.showMatches = true;
         }
     },
     methods: {
@@ -35,7 +35,7 @@ app.data = {
         getClosestMatches: function(query) {
             if (!query) return [];
             let matches = this.species.filter(species => species.toLowerCase().includes(query.toLowerCase()));
-            return matches
+            return matches;
         },
         select_bird: function(bird) {
             this.searchQuery = bird;
@@ -154,7 +154,24 @@ app.load_data = function () {
         }
     });
     app.map.addControl(drawControl);
+    let locateControl = L.control({position: 'topleft'});
 
+    locateControl.onAdd = function (map) {
+        let div = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+        div.style.backgroundColor = 'white';
+        div.style.backgroundImage = "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 36 36\"><text x=\"45%\" y=\"55%\" dominant-baseline=\"middle\" text-anchor=\"middle\" fill=\"black\" font-size=\"30\">🏠</text></svg>')"; 
+        div.style.backgroundSize = '30px 30px';
+        div.style.width = '30px';
+        div.style.height = '30px';
+    
+        div.onclick = function(){
+            map.locate({setView: true, maxZoom: 16});
+        }
+    
+        return div;
+    };
+    
+    locateControl.addTo(app.map);
     app.map.on('draw:created', function(e) {
         var type = e.layerType,
             layer = e.layer;
@@ -238,7 +255,5 @@ document.addEventListener('click', function(e) {
             window.location.href = '/BirdApp/checklist?' +
                 'lat=' + lat + 'Lng=' + lng ;
         }
-
-
     }
 });
