@@ -30,6 +30,9 @@ from yatl.helpers import A
 from .common import db, session, T, cache, auth, logger, authenticated, unauthenticated, flash
 from py4web.utils.url_signer import URLSigner
 from .models import get_user_email, load_csv_files
+from py4web.utils.form import Form, FormStyleBulma
+from py4web.utils.grid import Grid, GridClassStyleBulma
+import json
 
 url_signer = URLSigner(session)
 
@@ -60,22 +63,33 @@ def statistics():
     seLng = float(request.params.get('seLng'))
 
     #Filter Stats located in this region
+    # Join the sightings and checklists tables on sampling_event_id
+    sightings_with_location = db(db.sightings.sampling_event_id == db.checklists.sampling_event_id)
+
+    # Filter the sightings based on the region coordinates
+    sightings_in_region = sightings_with_location((db.checklists.lat >= min(swLat, nwLat, neLat, seLat)) & 
+                            (db.checklists.lat <= max(swLat, nwLat, neLat, seLat)) &
+                            (db.checklists.lng >= min(swLng, nwLng, neLng, seLng)) &
+                            (db.checklists.lng <= max(swLng, nwLng, neLng, seLng)))
+
+    # Group the filtered sightings by species and count the number of checklists and total sightings for each species
+    species_stats = sightings_in_region.select(db.sightings.common_name, 
+                                            db.sightings.sampling_event_id.count().with_alias('checklist_count'), 
+                                            db.sightings.observation_count.sum().with_alias('total_sightings'),
+                                            groupby=db.sightings.common_name)
+
+    # Convert species_stats to a list of dictionaries
+    species_stats_list = [dict(common_name=row.sightings.common_name, 
+                               checklist_count=row.checklist_count,
+                               total_sightings=row.total_sightings) 
+                          for row in species_stats]
+
+    # Convert species_stats_list to JSON
+    species_stats_json = json.dumps(species_stats_list)
+    print(species_stats_json)
+    return dict(location_url = URL('location', signer=url_signer), 
+                species_stats=species_stats_json)
     
-
-    return dict(
-        # COMPLETE: return here any signed URLs you need.
-        my_callback_url = URL('my_callback', signer=url_signer),
-        swLat = swLat,
-        swLng = swLng,
-        nwLat = nwLat,
-        nwLng = nwLng,
-        neLat = neLat,
-        neLng = neLng,
-        seLat = seLat,
-        seLng = seLng
-            
-    )
-
 @action("checklist")
 @action.uses('checklist.html', db, auth.user, url_signer)
 def checklist():
