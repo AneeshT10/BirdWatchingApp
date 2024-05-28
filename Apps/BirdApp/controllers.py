@@ -122,10 +122,11 @@ def get_species():
 def get_sightings():
     region_coords = session.get('region_coords')  # Get the coordinates of the region
     bird_name = request.params.get('bird_name')  # Get the bird name from the request parameters
-    if region_coords:
+    heatmap = request.params.get('heatmap')  # Get the heatmap flag from the request parameters
+    if region_coords and not heatmap:
         region_coords = [float(coord) for coord in region_coords]  # Convert to list of floats
 
-    if region_coords:
+    if region_coords and not heatmap:
         # Join the sightings table with the checklists and species tables
         query = (db.sightings.sampling_event_id == db.checklists.sampling_event_id)
 
@@ -142,14 +143,8 @@ def get_sightings():
             orderby=db.sightings.sampling_event_id
         ).as_list()
 
-        print("SIGHTINGS: ",sightings)
     else:
-        sightings = db(db.sightings.observation_count > 0).select(
-            db.sightings.sampling_event_id,
-            db.sightings.observation_count.sum(),
-            groupby=db.sightings.sampling_event_id,
-            orderby=db.sightings.sampling_event_id
-        ).as_list()
+        sightings = db( (db.sightings.common_name == bird_name) & (db.sightings.observation_count > 0)).select().as_list()
     return dict(sightings=sightings)
 
 @action('get_checklists')

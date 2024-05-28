@@ -46,22 +46,22 @@ app.data = {
                 this.showMatches = false;
             });
             this.selected_bird = bird;
-        
+
             // Get event_ids where bird names match
             axios.get(get_sightings_url, {
                 params: {
-                    bird_name: bird
+                    bird_name: bird,
+                    heatmap: true
                 }
             }).then((response) => {
                 let event_ids = response.data.sightings.map(sighting => sighting.sampling_event_id);
                 // Get checklists where event_ids match
-                
                 axios.get(get_checklists_url, {
                     params: {
                         event_ids: event_ids.join(',')
                     }
                 }).then((response2) => {
-                    console.log(event_ids);
+                    //console.log(event_ids);
                     let heatmap_cords = response2.data.checklists.map(checklist => [checklist.lat, checklist.lng, 0.2]);
                     console.log('Number of heatmap coordinates:', heatmap_cords.length);
                     // Update heatmap
