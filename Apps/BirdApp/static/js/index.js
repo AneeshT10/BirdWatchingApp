@@ -32,6 +32,9 @@ app.data = {
             // This is an example.
             this.my_value += 1;
         },
+        goToUserStats: function() {
+            window.location.href = stats_url;
+        },
         getClosestMatches: function(query) {
             if (!query) return [];
             let matches = this.species.filter(species => species.toLowerCase().includes(query.toLowerCase()));

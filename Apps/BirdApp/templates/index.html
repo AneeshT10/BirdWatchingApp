@@ -15,7 +15,7 @@
     </div>
 </div>
 
-<button class="button is-primary my-birding-button">My Birding</button>
+<button class="button is-primary my-birding-button" @click="goToUserStats">My Birding</button>
 
 <div class="has-text-centered">
   <button class="button is-primary redo-button" @click = redo() >&#x21BB;</button>
@@ -34,6 +34,7 @@
   let get_species_url = "[[=XML(get_species_url)]]";
   let get_checklists_url = "[[=XML(get_checklists_url)]]";
   let get_sightings_url = "[[=XML(get_sightings_url)]]";
+  let stats_url = "[[=XML(stats_url)]]";
 </script>
 <script src="js/index.js"></script>
 [[end]]

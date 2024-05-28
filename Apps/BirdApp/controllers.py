@@ -46,12 +46,17 @@ def index():
         get_species_url = URL('get_species', signer=url_signer),
         get_checklists_url = URL('get_checklists', signer=url_signer),
         get_sightings_url = URL('get_sightings', signer=url_signer),
+        stats_url = URL('statistics', signer=url_signer),
     )
+@action('statistics')
+@action.uses('statistics.html', db, auth.user, url_signer)
+def statistics():
+    return dict()
 
 @action('location')
 #@action('statistics?<swLat:float>&<swLng:float>&<nwLat:float>&<nwLng:float>&<neLat:float>&<neLng:float>&<seLat:float>&<seLng:float>')
-@action.uses('location.html', db, auth.user, url_signer)
-def statistics():
+@action.uses('location.html', db, auth.user, url_signer, session)
+def location():
     #Loaded rectangle region
     swLat = float(request.params.get('swLat'))
     swLng = float(request.params.get('swLng'))
@@ -62,6 +67,7 @@ def statistics():
     seLat = float(request.params.get('seLat'))
     seLng = float(request.params.get('seLng'))
 
+    session['region_coords'] = [swLat, swLng, neLat, neLng]
     #Filter Stats located in this region
     # Join the sightings and checklists tables on sampling_event_id
     sightings_with_location = db(db.sightings.sampling_event_id == db.checklists.sampling_event_id)
@@ -88,6 +94,8 @@ def statistics():
     species_stats_json = json.dumps(species_stats_list)
     print(species_stats_json)
     return dict(location_url = URL('location', signer=url_signer), 
+                get_sightings_url = URL('get_sightings', signer=url_signer),
+                get_checklists_url = URL('get_checklists', signer=url_signer),
                 species_stats=species_stats_json)
     
 @action("checklist")
@@ -110,22 +118,48 @@ def get_species():
     return dict(species=species)
 
 @action('get_sightings')
+@action.uses(session, db)
 def get_sightings():
-    bird_name = request.params.get('bird_name')
-    if bird_name:
-        sightings = db(db.sightings.common_name == bird_name).select().as_list()
+    region_coords = session.get('region_coords')  # Get the coordinates of the region
+    bird_name = request.params.get('bird_name')  # Get the bird name from the request parameters
+    if region_coords:
+        region_coords = [float(coord) for coord in region_coords]  # Convert to list of floats
+
+    if region_coords:
+        # Join the sightings table with the checklists and species tables
+        query = (db.sightings.sampling_event_id == db.checklists.sampling_event_id)
+
+        # Add a condition to the where clause to filter the records based on the coordinates
+        query &= (db.checklists.lat >= region_coords[0]) & (db.checklists.lat <= region_coords[2]) & \
+                 (db.checklists.lng >= region_coords[1]) & (db.checklists.lng <= region_coords[3])
+        # Add a condition to the where clause to filter the records based on the bird name
+        if bird_name:
+            query &= (db.sightings.common_name == bird_name)
+        sightings = db(query).select(
+            db.sightings.sampling_event_id,
+            db.sightings.observation_count.sum(),
+            groupby=db.sightings.sampling_event_id,
+            orderby=db.sightings.sampling_event_id
+        ).as_list()
+
+        print("SIGHTINGS: ",sightings)
     else:
-        sightings = db(db.sightings).select().as_list()
+        sightings = db(db.sightings.observation_count > 0).select(
+            db.sightings.sampling_event_id,
+            db.sightings.observation_count.sum(),
+            groupby=db.sightings.sampling_event_id,
+            orderby=db.sightings.sampling_event_id
+        ).as_list()
     return dict(sightings=sightings)
 
 @action('get_checklists')
 def get_checklists():
     event_ids = request.params.get('event_ids')
-    print("EVENT ID",event_ids)
 
     if event_ids:
         event_ids = event_ids.split(',') # Convert to list
         checklists = db(db.checklists.sampling_event_id.belongs(event_ids)).select().as_list()
+
     else:
         checklists = db(db.checklists).select().as_list()
     #print("LENGTH OF CHECK",len(checklists))
