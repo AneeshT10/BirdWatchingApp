@@ -36,63 +36,10 @@ import json
 
 url_signer = URLSigner(session)
 
-# def add_example_user_data():
-#     # Example email of the current user
-#     user_email = get_user_email()
-#     if not user_email:
-#         return  # Ensure there is a logged-in user
-
-#     # Add example species
-#     species_data = [
-#         "Northern Cardinal",
-#         "Blue Jay",
-#         "American Robin",
-#         "Bald Eagle",
-#         "Hummingbird",
-#         "Goldfinch",
-#         "Red-tailed Hawk",
-#         "Peregrine Falcon",
-#         "House Sparrow",
-#         "European Starling"
-#     ]
-
-#     for bird_name in species_data:
-#         if not db(db.species.bird_name == bird_name).count():
-#             db.species.insert(bird_name=bird_name)
-    
-#     # Add example checklists and sightings
-#     example_checklists = [
-#         {"sampling_event_id": f"E{i+1}", "lat": 37.7749 + i * 0.01, "lng": -122.4194 + i * 0.01, "observation_date": f"2023-05-{i+1:02d}", "observation_time": "08:00:00", "observer_id": user_email, "duration": 1.5 + i * 0.5}
-#         for i in range(30)
-#     ]
-    
-#     for checklist in example_checklists:
-#         if not db(db.checklists.sampling_event_id == checklist["sampling_event_id"]).count():
-#             db.checklists.insert(**checklist)
-    
-#     example_sightings = []
-#     bird_names = ["Northern Cardinal", "Blue Jay", "American Robin", "Bald Eagle", "Hummingbird", "Goldfinch", "Red-tailed Hawk", "Peregrine Falcon", "House Sparrow", "European Starling"]
-    
-#     for i in range(30):
-#         for bird_name in bird_names:
-#             example_sightings.append({
-#                 "sampling_event_id": f"E{i+1}",
-#                 "common_name": bird_name,
-#                 "observation_count": (i % 5) + 1  # Random observation count between 1 and 5
-#             })
-    
-#     for sighting in example_sightings:
-#         if not db((db.sightings.sampling_event_id == sighting["sampling_event_id"]) & (db.sightings.common_name == sighting["common_name"])).count():
-#             db.sightings.insert(**sighting)
-
-#     db.commit()
-
-
 @action('index')
 @action.uses('index.html', db, auth, url_signer)
 def index():
     load_csv_files()
-    #add_example_user_data()
     return dict(
         # COMPLETE: return here any signed URLs you need.
         my_callback_url = URL('my_callback', signer=url_signer),
@@ -137,27 +84,10 @@ def statistics():
     sightings_over_time_json = sightings_over_time.as_list()
     sighting_locations_json = sighting_locations.as_list()
 
-
-
-    # pretty print the lists
-    print("\n")
-    print("Species Seen: ", species_seen_json)
-    print("\n")
-    print("Sightings Over Time: ", sightings_over_time_json)
-    print("\n")
-    print("Sighting Locations: ", sighting_locations_json)
-    print("\n")
-
-
     return dict(
         species_seen=species_seen_json,
         sightings_over_time=sightings_over_time_json,
         sighting_locations=sighting_locations_json,
-        my_callback_url = URL('my_callback', signer=url_signer),
-        get_species_url = URL('get_species', signer=url_signer),
-        get_checklists_url = URL('get_checklists', signer=url_signer),
-        get_sightings_url = URL('get_sightings', signer=url_signer),
-        stats_url = URL('statistics', signer=url_signer),
     )
 
 @action('location')
