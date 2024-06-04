@@ -4,6 +4,23 @@
   [v-cloak] {
     display: none;
   }
+
+  .list-item {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .list-item:hover {
+    background-color: #f9f9f9;
+  }
+
+  .box {
+    margin-top: 20px;
+  }
+
+  .chart {
+    margin-top: 20px;
+  }
 </style>
 
 <div class="section" id="app" v-cloak>
@@ -16,22 +33,27 @@
       </div>
     </div>
     <div class="list is-hoverable">
-      <a v-for="species in filteredSpecies" :key="species.bird_name" @click="fetchSightings(species.bird_name)"
+      <a v-for="species in filteredSpecies" :key="species.common_name" @click="selectSpecies(species.common_name)"
         class="list-item">
-        {{ species.bird_name }}
+        {{ species.common_name }}
       </a>
     </div>
     <div v-if="selectedSpecies" class="box">
       <h2 class="subtitle">Sightings for {{ selectedSpecies }}</h2>
-      <div id="time-visualization"></div>
-      <div id="map" style="height: 400px;"></div>
+      <div id="time-visualization" class="chart"></div>
     </div>
   </div>
 </div>
 
 [[block page_scripts]]
-<!-- Loads the index-specific js for Vue -->
+<!-- Loads the index-specific js for Vue and D3 -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
 <script src="https://unpkg.com/vue@3.2.22/dist/vue.global.js"></script>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+  let species_seen = `[[=XML(species_seen)]]`;
+  let sightings_over_time = `[[=XML(sightings_over_time)]]`;
+  let sighting_locations = `[[=XML(sighting_locations)]]`;
+</script>
 <script src="js/statistics.js"></script>
 [[end]]
