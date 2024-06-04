@@ -8,6 +8,8 @@
   .list-item {
     padding: 10px;
     border-bottom: 1px solid #ddd;
+    display: block;
+    clear: both;
   }
 
   .list-item:hover {
@@ -18,7 +20,28 @@
     margin-top: 20px;
   }
 
+  .table {
+    margin-top: 20px;
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .table th,
+  .table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+  }
+
+  .table th {
+    background-color: #f2f2f2;
+  }
+
   .chart {
+    margin-top: 20px;
+  }
+
+  #map {
+    height: 400px;
     margin-top: 20px;
   }
 </style>
@@ -27,6 +50,10 @@
   <!-- Vue.js template -->
   <div class="container">
     <h1 class="title">My Stats</h1>
+    <div class="box">
+      <h2 class="subtitle">Overall Bird Sightings Over Time</h2>
+      <div id="overall-time-visualization" class="chart"></div>
+    </div>
     <div class="field">
       <div class="control">
         <input class="input" type="text" placeholder="Search for a species" v-model="searchQuery">
@@ -41,15 +68,19 @@
     <div v-if="selectedSpecies" class="box">
       <h2 class="subtitle">Sightings for {{ selectedSpecies }}</h2>
       <div id="time-visualization" class="chart"></div>
+      <div id="map" class="chart"></div>
     </div>
   </div>
 </div>
 
 [[block page_scripts]]
-<!-- Loads the index-specific js for Vue and D3 -->
+<!-- Loads the index-specific js for Vue, D3, and Leaflet -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
 <script src="https://unpkg.com/vue@3.2.22/dist/vue.global.js"></script>
 <script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
 <script>
   let species_seen = `[[=XML(species_seen)]]`;
   let sightings_over_time = `[[=XML(sightings_over_time)]]`;
