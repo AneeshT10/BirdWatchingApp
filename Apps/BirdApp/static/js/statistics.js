@@ -40,11 +40,18 @@ app.data = {
                 return acc;
             }, {});
 
-            // Convert to array of objects
-            return Object.entries(grouped).map(([date, count]) => ({
+            // Convert to array of objects and sort by date
+            const sortedData = Object.entries(grouped).map(([date, count]) => ({
                 date: new Date(date),
                 count
-            }));
+            })).sort((a, b) => a.date - b.date);
+
+            // Create cumulative sum
+            let cumulativeCount = 0;
+            return sortedData.map(d => {
+                cumulativeCount += d.count;
+                return { date: d.date, count: cumulativeCount };
+            });
         }
     },
     methods: {
