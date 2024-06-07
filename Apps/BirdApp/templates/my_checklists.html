@@ -1,0 +1,56 @@
+[[extend 'layout.html']]
+
+<style>
+[v-cloak] {
+    display: none;
+}
+</style>
+
+<div class="section ffont" id="app" v-cloak>
+    <h1 class="title">My Checklists</h1>
+    <table v-if="checklists.length" class="table is-fullwidth">
+        <thead>
+            <tr>
+                <th>Location</th>
+                <th>Checklist</th>
+                <th>Date</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr v-for="checklist in checklists" :key="checklist.id">
+                <td>
+                    {{ checklist.location }}
+                    <div :id="'map' + checklist.id" style="width: 200px; height: 200px;"></div>
+                </td>
+                <td>
+                    <table class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth">
+                        <thead>
+                            <tr>
+                                <th>Bird</th>
+                                <th>Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(count, bird) in checklist.bird_counts" :key="bird">
+                                <td>{{ bird }}</td>
+                                <td>{{ count }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+                <td>{{ checklist.observation_date }}</td>
+                <td>
+                    <button class="button is-small is-danger" @click="deleteChecklist(checklist.id)">Delete</button>
+                    <button class="button is-small is-primary" @click="editChecklist(checklist.id)">Edit</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <p v-else>No checklists available.</p>
+    </div>
+    
+    [[block page_scripts]]
+<script src="https://unpkg.com/vue@next"></script>
+<script src="js/my_checklists.js"></script>
+[[end]]
