@@ -25,6 +25,7 @@ session, db, T, auth, and tempates are examples of Fixtures.
 Warning: Fixtures MUST be declared with @action.uses({fixtures}) else your app will result in undefined behavior
 """
 
+import datetime
 from py4web import action, request, abort, redirect, URL
 from yatl.helpers import A
 from .common import db, session, T, cache, auth, logger, authenticated, unauthenticated, flash
@@ -141,6 +142,8 @@ def checklist():
     return dict(
         # COMPLETE: return here any signed URLs you need.
         my_callback_url = URL('my_callback', signer=url_signer),
+        get_species_url = URL('get_species', signer=url_signer),
+
     )
 
 @action('my_callback')
@@ -153,6 +156,11 @@ def my_callback():
 def get_species():
     species = db(db.species).select().as_list()
     return dict(species=species)
+
+@action('get_all_sightings')
+@action.uses(session, db)
+def get_all_sightings():
+    return(dict(sightings=db(db.sightings).select().as_list()))
 
 @action('get_sightings')
 @action.uses(session, db)
@@ -197,4 +205,95 @@ def get_checklists():
     #print("LENGTH OF CHECK",len(checklists))
     return dict(checklists=checklists)
 
+@action('search_species', method=['GET'])
+@action.uses(db)
+def search_species():
+    try:
+        query = request.params.get('query')
+        species = db(db.species.bird_name.contains(query)).select().as_list()
+        return dict(species=species)
+    except Exception as e:
+        logger.error(f"Error searching for species with query {query}: {e}")
+        return dict(species=[])
 
+@action('submit_checklist', method=['POST'])
+@action.uses(db, auth.user)
+def submit_checklist():
+    try:
+        data = request.json
+
+        checklist_id = db.checklists.insert(
+            sampling_event_id= 0,
+            observer_id=auth.current_user['email'], 
+            lat=data['lat'], 
+            lng=data['lng'], 
+            observation_date=data['date'],
+            observation_time=datetime.datetime.now().time(),
+            duration=data['duration']
+        )
+        db(db.checklists.id == checklist_id).update(sampling_event_id=checklist_id)
+
+        for sighting in data['sightings']:
+            #print("Inserting sighting:", sighting)
+            db.sightings.insert(
+                sampling_event_id=checklist_id, 
+                common_name=sighting['name'], 
+                observation_count=sighting['count']
+            )
+        return dict(status='success')
+    except Exception as e:
+        logger.error(f"Error submitting checklist: {e}")
+        return dict(status='error', message=str(e))
+
+@action('get_my_checklists', method=['GET'])
+@action.uses(db, auth.user)
+def get_my_checklists():
+    user_id = auth.current_user['email']
+    print("Fetching checklists for user:", user_id)
+    checklists = db(db.checklists.observer_id == user_id).select().as_list()
+    return dict(checklists=checklists)
+
+@action('my_checklists')
+@action.uses('my_checklists.html', db, auth.user)
+def my_checklists():
+    return dict()
+
+@action('delete_checklist', method=['POST'])
+@action.uses(db, auth.user)
+def delete_checklist():
+    try:
+        data = request.json
+        checklist_id = data.get('id')
+        # Get the sampling_event_id of the checklist being deleted
+        sampling_event_id = db(db.checklists.id == checklist_id).select(db.checklists.sampling_event_id).first().sampling_event_id
+        # Delete the checklist
+        db(db.checklists.id == checklist_id).delete()
+        # Delete all sightings with the same sampling_event_id
+        db(db.sightings.sampling_event_id == sampling_event_id).delete()
+        return dict(status='success')
+    except Exception as e:
+        logger.error(f"Error deleting checklist: {e}")
+        return dict(status='error', message=str(e))
+
+# Ensure `edit_checklist` function exists and handles editing appropriately
+@action('edit_checklist')
+@action.uses('edit_checklist.html', db, auth.user)
+def edit_checklist():
+    checklist_id = request.params.get('id')
+    # Fetch the checklist and pass to template or handle the edit form
+    checklist = db(db.checklists.id == checklist_id).select().first()
+    return dict(checklist=checklist)
+
+@action('get_birds_by_event', method=["POST"])
+@action.uses(db, auth.user)
+def get_birds_by_event():
+    try:
+        data = request.json
+        sampling_event_id = data.get('sampling_event_id')
+        birds = db(db.sightings.sampling_event_id == sampling_event_id).select()
+        print(birds)
+        bird_counts = {bird.common_name: bird.observation_count for bird in birds}
+        return dict(status='success', bird_counts=bird_counts)
+    except Exception as e:
+        logger.error(f"Error retrieving birds: {e}")
+        return dict(status='error', message=str(e))
