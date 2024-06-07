@@ -238,25 +238,15 @@ document.addEventListener('click', function(e) {
                 '&neLat=' + northEast.lat + '&neLng=' + northEast.lng +
                 '&seLat=' + southEast.lat + '&seLng=' + southEast.lng;
         }
-
-        
-
     }
-});
-document.addEventListener('click', function(e) {
+
+    //Added to send the lat lng to the checklist page
     if (e.target.id === 'checklist') {
-        console.log("Button clicked");
-        // Get the layer of the clicked button
-        var layer = e.target.layer
-        console.log(layer);
+        var layer = e.target.layer;
         if (layer) {
-            // Get the LatLng of position
-            var bounds = layer.getLatLng();
-            var lat = bounds.lat;
-            var lng = bounds.lng;
-            //redirect
-            window.location.href = '/BirdApp/checklist?' +
-                'lat=' + lat + 'Lng=' + lng ;
+            var latLng = layer.getLatLng();
+            // Redirect to checklist page with lat and lng as parameters
+            window.location.href = '/BirdApp/checklist?' + 'lat=' + latLng.lat + '&lng=' + latLng.lng;
         }
-    }
+    }   
 });
