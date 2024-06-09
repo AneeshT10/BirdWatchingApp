@@ -1,0 +1,77 @@
+[[extend 'layout.html']]
+
+<style>
+[v-cloak] {
+    display: none;
+}
+</style>
+
+<div class="section" id="app" v-cloak>
+    <h1 class="title">Edit Checklist</h1>
+
+    <div class="field">
+        <div class="control">
+            <label class="label ffont">Search and Add Bird</label>
+            <input class="input searchfield" type="text" placeholder="Search..." v-model="searchQuery">
+            <div class="control matches-list">
+                <div class="field" v-for="match in closestMatches" v-show="showMatches">
+                    <a href="#" @click.prevent="addSpecies(match)">{{ match }}</a>  
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="field ffont">
+        <label class="label">Date</label>
+        <div class="control">
+            <input class="input" type="date" v-model="date">
+        </div>
+    </div>
+
+    <div class="field ffont">
+        <label class="label">Duration</label>
+        <div class="control">
+            <input class="input" type="text" v-model="duration" @input="checkFloat">
+        </div>
+    </div>
+
+    <!-- Add Species Table -->
+    <div class="field">
+        <table class="table is-fullwidth ffont">
+            <thead>
+                <tr>
+                    <th>Species</th>
+                    <th>Count</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="species in addedSpecies" :key="species.id">
+                    <td>{{ species.name }}</td>
+                    <td>{{ species.count }}</td>
+                    <td>
+                        <button class="button is-small" @click="incCount(species)">+</button>
+                        <button class="button is-small" @click="decCount(species)">-</button> &nbsp
+                        <button class="button is-danger is-small" @click="deleteSpecies(species)">Delete</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="control">
+        <button class="button is-primary" @click="updateChecklist">Save</button>
+        <button class="button is-link" @click="viewMyChecklists">Cancel</button>
+    </div>
+</div>
+
+[[block page_scripts]]
+<script src="https://unpkg.com/vue@next"></script>
+<script>
+    let checklist_id = "[[=request.query.get('id')]]";
+    let load_checklist_url = "[[=URL('load_checklist', request.query.get('id'))]]";
+    let update_checklist_url = "[[=URL('update_checklist')]]";
+    let find_species_url = "[[=URL('find_species')]]";
+</script>
+<script src="js/edit_checklist.js"></script>
+[[end]]

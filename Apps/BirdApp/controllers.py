@@ -280,9 +280,16 @@ def delete_checklist():
 @action.uses('edit_checklist.html', db, auth.user)
 def edit_checklist():
     checklist_id = request.params.get('id')
-    # Fetch the checklist and pass to template or handle the edit form
-    checklist = db(db.checklists.id == checklist_id).select().first()
-    return dict(checklist=checklist)
+    if not checklist_id:
+        abort(400, "Checklist ID is required")
+    return dict(
+        checklist_id=checklist_id,
+        get_species_url=URL('get_species'),
+        load_checklist_url=URL('load_checklist', checklist_id),
+        update_checklist_url=URL('update_checklist')
+    )
+
+
 
 @action('get_birds_by_event', method=["POST"])
 @action.uses(db, auth.user)
@@ -297,3 +304,59 @@ def get_birds_by_event():
     except Exception as e:
         logger.error(f"Error retrieving birds: {e}")
         return dict(status='error', message=str(e))
+
+
+@action('load_checklist/<checklist_id>', method='GET')
+@action.uses(db, auth.user)
+def load_checklist(checklist_id=None):
+    checklist = db(db.checklists.id == checklist_id).select().first()
+    if checklist:
+        sightings = db(db.sightings.sampling_event_id == checklist.sampling_event_id).select()
+        return dict(checklist=checklist, sightings=sightings)
+    return dict(error="Checklist not found")
+
+@action('update_checklist', method='POST')
+@action.uses(db, auth.user)
+def update_checklist():
+    data = request.json
+    checklist_id = data.get('checklist_id')
+    checklist_data = data.get('data', {}).get('checklist')
+    sightings_data = data.get('data', {}).get('sightings')
+
+    if checklist_id and checklist_data and sightings_data:
+        db(db.checklists.id == checklist_id).update(**checklist_data)
+
+        # Get existing sightings
+        existing_sightings = db(db.sightings.sampling_event_id == checklist_data['sampling_event_id']).select()
+
+        # Update existing sightings and insert new ones
+        updated_sighting_ids = []
+        for sighting in sightings_data:
+            if sighting.get('id'):
+                db(db.sightings.id == sighting['id']).update(observation_count=sighting['number'])
+                updated_sighting_ids.append(sighting['id'])
+            else:
+                new_sighting_id = db.sightings.insert(sampling_event_id=checklist_data['sampling_event_id'],
+                                                      common_name=sighting['species_name'],
+                                                      observation_count=sighting['number'])
+                updated_sighting_ids.append(new_sighting_id)
+
+        # Delete sightings that are no longer in the updated checklist
+        for existing_sighting in existing_sightings:
+            if existing_sighting.id not in updated_sighting_ids:
+                db(db.sightings.id == existing_sighting.id).delete()
+
+        return dict(success=True)
+    return dict(success=False, error="Invalid data")
+
+
+
+@action('find_species', method='GET')
+@action.uses(db)
+def find_species():
+    query = request.params.get('query', '')
+    species = db(db.species.bird_name.like(f'%{query}%')).select()
+    return dict(species=species)
+
+
+
