@@ -35,6 +35,9 @@ app.data = {
         goToUserStats: function() {
             window.location.href = stats_url;
         },
+        goToMyChecklists: function() {
+            window.location.href = my_checklists_url;
+        },
         getClosestMatches: function(query) {
             if (!query) return [];
             let matches = this.species.filter(species => species.toLowerCase().includes(query.toLowerCase()));

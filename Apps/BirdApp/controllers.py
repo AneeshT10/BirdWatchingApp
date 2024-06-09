@@ -48,6 +48,7 @@ def index():
         get_checklists_url = URL('get_checklists', signer=url_signer),
         get_sightings_url = URL('get_sightings', signer=url_signer),
         stats_url = URL('statistics', signer=url_signer),
+        my_checklists_url = URL('my_checklists', signer=url_signer),
     )
 @action('statistics')
 @action.uses('statistics.html', db, auth.user, url_signer)
@@ -86,6 +87,7 @@ def statistics():
     sighting_locations_json = sighting_locations.as_list()
 
     return dict(
+        total_hours_url=URL('total_hours', signer=url_signer),
         species_seen=species_seen_json,
         sightings_over_time=sightings_over_time_json,
         sighting_locations=sighting_locations_json,
@@ -357,6 +359,14 @@ def find_species():
     query = request.params.get('query', '')
     species = db(db.species.bird_name.like(f'%{query}%')).select()
     return dict(species=species)
+
+@action('total_hours', method='GET')
+@action.uses(db, auth.user)
+def total_hours():
+    checklists = db(db.checklists.observer_id == auth.current_user['email']).select()
+    total_hours = sum([checklist.duration for checklist in checklists])
+    return dict(total_hours=total_hours)
+
 
 
 

@@ -14,6 +14,9 @@ app.data = {
             selectedSpecies: '',
             map: null,
             heatLayer: null,
+            numberOfSightings: 0,
+            totalHoursBirdWatched: 0.0,
+            mostSeenBird: '',
         };
     },
     computed: {
@@ -73,19 +76,48 @@ app.data = {
             let locationsJsonString = sighting_locations.replace(/'/g, '"');
             this.sightingLocations = JSON.parse(locationsJsonString);
 
-            console.log("Loaded Species List:", this.speciesList);
-            console.log("Loaded Sightings Over Time:", this.sightingsOverTime);
-            console.log("Loaded Sighting Locations:", this.sightingLocations);
+            //console.log("Loaded Species List:", this.speciesList);
+            //console.log("Loaded Sightings Over Time:", this.sightingsOverTime);
+            //console.log("Loaded Sighting Locations:", this.sightingLocations);
 
             // Visualize overall data
             this.visualizeOverallTime();
+
+            for(let i = 0; i < this.sightingsOverTime.length; i++){
+                this.numberOfSightings += this.sightingsOverTime[i].sightings.observation_count;
+                if(this.sightingsOverTime[i].sightings.observation_count > this.mostSeenBird){
+                    this.mostSeenBird = this.sightingsOverTime[i].sightings.common_name;
+                }
+            }
+
+            axios.get(total_hours_url)
+            .then(response => {
+                this.totalHoursBirdWatched = response.data.total_hours;
+            })
+
+            console.log(this.numberOfSightings, this.mostSeenBird);
+
         },
         selectSpecies(speciesName) {
-            this.selectedSpecies = speciesName;
-            this.$nextTick(() => {
-                this.visualizeTime();
-                this.visualizeHeatmap();
-            });
+            if (this.selectedSpecies == speciesName){
+                this.selectedSpecies = '';
+            }
+            else{
+                this.selectedSpecies = speciesName;
+                this.$nextTick(() => {
+                    // Filter the sightings for the selected species
+                    const sightingsOfSelectedSpecies = this.sightingLocations
+                        .filter(sighting => sighting.sightings.common_name === this.selectedSpecies);
+                    
+                    // If there are no sightings of the selected species, return
+                    
+                    // Set the map's view to the location of the first sighting
+                    
+                    this.visualizeTime();
+                    this.visualizeHeatmap();
+                    this.map.setView([sightingsOfSelectedSpecies[0].checklists.lat, sightingsOfSelectedSpecies[0].checklists.lng], 13)
+                });
+            }
         },
         visualizeOverallTime() {
             const timeVisualization = document.getElementById('overall-time-visualization');
@@ -101,7 +133,7 @@ app.data = {
             console.log("Overall Sightings Data:", data);
 
             // Set the dimensions and margins of the graph
-            const margin = { top: 10, right: 30, bottom: 30, left: 60 },
+            const margin = { top: 10, right: 30, bottom: 40, left: 60 },
                 width = 800 - margin.left - margin.right,
                 height = 400 - margin.top - margin.bottom;
 
@@ -120,6 +152,11 @@ app.data = {
             svg.append("g")
                 .attr("transform", `translate(0,${height})`)
                 .call(d3.axisBottom(x));
+            // Add x-axis label
+            svg.append("text")
+            .attr("transform", `translate(${width / 2},${height + margin.top + 30})`)
+            .style("text-anchor", "middle")
+            .text("Date");
 
             // Add Y axis
             const y = d3.scaleLinear()
@@ -127,6 +164,15 @@ app.data = {
                 .range([height, 0]);
             svg.append("g")
                 .call(d3.axisLeft(y));
+            
+            // Add y-axis label
+            svg.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 0 - margin.left)
+            .attr("x",0 - (height / 2))
+            .attr("dy", "1em")
+            .style("text-anchor", "middle")
+            .text("Number of bird sightings");
 
             // Add the line
             svg.append("path")
@@ -167,7 +213,7 @@ app.data = {
             console.log("Species Sightings Data:", data);
 
             // Set the dimensions and margins of the graph
-            const margin = { top: 10, right: 30, bottom: 30, left: 60 },
+            const margin = { top: 10, right: 30, bottom: 40, left: 60 },
                 width = 800 - margin.left - margin.right,
                 height = 400 - margin.top - margin.bottom;
 
@@ -178,32 +224,66 @@ app.data = {
                 .attr("height", height + margin.top + margin.bottom)
                 .append("g")
                 .attr("transform", `translate(${margin.left},${margin.top})`);
-
-            // Add X axis
-            const x = d3.scaleTime()
-                .domain(d3.extent(data, d => d.date))
-                .range([0, width]);
-            svg.append("g")
-                .attr("transform", `translate(0,${height})`)
-                .call(d3.axisBottom(x));
+            // // Add X axis
+            // const x = d3.scaleTime()
+            // .domain(d3.extent(data, d => d.date))
+            // .range([0, width]);
+            // svg.append("g")
+            // .attr("transform", `translate(0,${height})`)
+            // .call(d3.axisBottom(x));
 
             // Add Y axis
             const y = d3.scaleLinear()
-                .domain([0, d3.max(data, d => d.count)])
-                .range([height, 0]);
+            .domain([0, d3.max(data, d => d.count)])
+            .range([height, 0]);
             svg.append("g")
-                .call(d3.axisLeft(y));
+            .call(d3.axisLeft(y));
+            svg.append("g")
+            .call(d3.axisLeft(y));
 
-            // Add the line
-            svg.append("path")
-                .datum(data)
-                .attr("fill", "none")
-                .attr("stroke", "steelblue")
-                .attr("stroke-width", 1.5)
-                .attr("d", d3.line()
-                    .x(d => x(d.date))
-                    .y(d => y(d.count))
-                );
+            // Add y-axis label
+            svg.append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 0 - margin.left)
+                .attr("x",0 - (height / 2))
+                .attr("dy", "1em")
+                .style("text-anchor", "middle")
+                .text("Number of bird sightings");
+
+            // Create an array of dates for the x-axis
+            const dates = data.map(d => d.date);
+
+            // Add X axis
+            const x = d3.scaleBand()
+            .domain(dates)
+            .range([0, width])
+            .padding(0.2); // this adds some space between bars
+            svg.append("g")
+            .attr("transform", `translate(0,${height})`)
+            .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%Y-%m-%d"))); // format the date
+
+            // Add x-axis label
+            svg.append("text")
+            .attr("transform", `translate(${width / 2},${height + margin.top + 30})`)
+            .style("text-anchor", "middle")
+            .text("Date Seen");
+
+            // Calculate bar width
+            // Calculate bar width
+            const maxBarWidth = 30; // Set your desired maximum bar width here
+            const barWidth = Math.min(x.bandwidth(), maxBarWidth); // get the minimum of the bandwidth and the maximum bar width
+            //const barWidth = x.bandwidth(); // get the width of the bars from the x scale
+
+            svg.selectAll("rect")
+            .data(data)
+            .enter()
+            .append("rect")
+            .attr("x", d => x(d.date) + (x.bandwidth() - barWidth) / 2) // center the bars within their bands
+            .attr("y", d => y(d.count))
+            .attr("width", barWidth)
+            .attr("height", d => height - y(d.count))
+            .attr("fill", "rgba(70, 130, 180, 0.5)"); // use rgba color format to specify opacity
+            
         },
         visualizeHeatmap() {
             const mapElement = document.getElementById('map');

@@ -18,6 +18,10 @@
 
   .box {
     margin-top: 20px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
   .table {
@@ -39,20 +43,76 @@
   .chart {
     margin-top: 20px;
   }
+  .columns {
+    display: flex;
+    justify-content: space-between;
+  }
 
+  .column {
+    flex: 1 0 0; /* This will make sure all columns have the same width */
+    box-sizing: border-box; /* Include padding and border in the column's width */
+  }
+  .stat-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px; /* Make the box rounded */
+    padding: 20px; /* Add padding */
+    margin: 10px; /* Add margin */
+}
+  .chart-container {
+    display: flex;
+    justify-content: center;
+  }
+  .box h2.subtitle {
+    text-align: center;
+  }
+  .st {
+    font-size: 1rem;
+  }
+  .stat {
+    font-size: 2rem;
+    font-weight: bold;
+    color: rgb(37, 78, 173); 
+}
+.stat2 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: rgb(37, 78, 173); 
+}
   #map {
     height: 400px;
     margin-top: 20px;
   }
 </style>
 
-<div class="section" id="app" v-cloak>
+<div class="section ffont" id="app" v-cloak>
   <!-- Vue.js template -->
   <div class="container">
-    <h1 class="title">My Stats</h1>
+
+    <h1 class="title">My Statistics</h1>
+    <div class="columns">
+      <div class="column stat-box">
+        <h2 class="subtitle st">Number of Sightings</h2>
+        <p class ="stat">{{ numberOfSightings }}</p>
+      </div>
+      <div class="column stat-box">
+        <h2 class="subtitle st">Total Minutes Bird Watched </h2>
+        <p class ="stat">{{ totalHoursBirdWatched }}</p>
+      </div>
+      <div class="column stat-box">
+        <h2 class="subtitle st">Most Seen Bird</h2>
+        <p class ="stat2">{{ mostSeenBird }}</p>
+      </div>
+    </div>
+
     <div class="box">
       <h2 class="subtitle">Overall Bird Sightings Over Time</h2>
-      <div id="overall-time-visualization" class="chart"></div>
+      <div class="chart-container">
+        <div id="overall-time-visualization" class="chart"></div>
+      </div>
     </div>
     <div class="field">
       <div class="control">
@@ -75,16 +135,11 @@
 
 [[block page_scripts]]
 <!-- Loads the index-specific js for Vue, D3, and Leaflet -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
-<script src="https://unpkg.com/vue@3.2.22/dist/vue.global.js"></script>
-<script src="https://d3js.org/d3.v7.min.js"></script>
-<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
 <script>
   let species_seen = `[[=XML(species_seen)]]`;
   let sightings_over_time = `[[=XML(sightings_over_time)]]`;
   let sighting_locations = `[[=XML(sighting_locations)]]`;
+  let total_hours_url = `[[=XML(total_hours_url)]]`;
 </script>
 <script src="js/statistics.js"></script>
 [[end]]
