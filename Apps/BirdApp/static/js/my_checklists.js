@@ -36,7 +36,11 @@ app.methods = {
     loadChecklists() {
         axios.get('/BirdApp/get_my_checklists')
             .then(response => {
-                this.checklists = response.data.checklists;
+                // Sort the checklists by date
+                this.checklists = response.data.checklists.sort((a, b) => {
+                    return new Date(b.observation_date) - new Date(a.observation_date);
+                });
+    
                 return Promise.all(this.checklists.map(checklist => 
                     this.getBirdsByEvent(checklist.sampling_event_id).then(bird_counts => {
                         checklist.bird_counts = bird_counts;

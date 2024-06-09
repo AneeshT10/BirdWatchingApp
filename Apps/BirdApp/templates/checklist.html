@@ -4,10 +4,15 @@
 [v-cloak] {
     display: none;
 }
+.button-color {
+    background-color: rgb(87, 87, 87) !important;
+    margin-bottom: 10px;
+}
 </style>
 
 <div class="section" id="app" v-cloak>
     <h1 class="title">Enter Checklist</h1>
+    
 
     <div class="field">
         <div class="control">
@@ -58,9 +63,9 @@
     </div>
 
     <div class="control">
-        <button class="button is-primary" @click="submitChecklist">Submit</button>
-        <button class="button is-link" @click="viewMyChecklists">View My Checklists</button>
+        <button class="button is-primary button-color" @click="submitChecklist">Submit</button>
     </div>
+    <button class="button is-link" @click="viewMyChecklists">View My Checklists</button>
 </div>
 
 [[block page_scripts]]

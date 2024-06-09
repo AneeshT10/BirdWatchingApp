@@ -59,12 +59,16 @@ app.data = {
     },
     methods: {
         loadData() {
+
+            
+            
+            
             // Replace single quotes with double quotes and parse the JSON string
-            let speciesJsonString = species_seen.replace(/'/g, '"');
+            let speciesJsonString = species_seen.replace(/(\W)'|'(\W)/g, '$1"$2');
             this.speciesList = JSON.parse(speciesJsonString);
 
             // Replace single quotes with double quotes and parse the JSON string
-            let sightingsJsonString = sightings_over_time.replace(/'/g, '"');
+            let sightingsJsonString = sightings_over_time.replace(/(\W)'|'(\W)/g, '$1"$2');
 
             // Replace datetime.date(YYYY, M, D) with "YYYY-MM-DD"
             sightingsJsonString = sightingsJsonString.replace(/datetime.date\((\d+), (\d+), (\d+)\)/g, '"$1-$2-$3"');
@@ -73,7 +77,7 @@ app.data = {
             this.sightingsOverTime = JSON.parse(sightingsJsonString);
 
             // Replace single quotes with double quotes and parse the JSON string for sighting locations
-            let locationsJsonString = sighting_locations.replace(/'/g, '"');
+            let locationsJsonString = sighting_locations.replace(/(\W)'|'(\W)/g, '$1"$2');
             this.sightingLocations = JSON.parse(locationsJsonString);
 
             //console.log("Loaded Species List:", this.speciesList);
