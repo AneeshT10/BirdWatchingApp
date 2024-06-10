@@ -35,6 +35,8 @@ app.data = {
             duration: '',
         };
     },
+    //Function allowing to display closest matches to
+    // user's current input in search bar
     watch: {
         searchQuery: function(val) {
             this.closestMatches = this.getClosestMatches(val);
@@ -42,17 +44,20 @@ app.data = {
         }
     },
     methods:{
+        //Check if the input is a float number
         checkFloat: function(event) {
             if (!/^\d*\.?\d*$/.test(event.target.value)) {
                 this.duration = this.duration.slice(0, -1);
             }
         },
+        //Function to delete species from a checklist
         deleteSpecies: function(species) {
             const index = this.addedSpecies.indexOf(species);
             if (index !== -1) {
                 this.addedSpecies.splice(index, 1);
             }
         },
+        //Function to add species to a checklist
         addSpecies: function(species) {
             let existingSpecies = this.addedSpecies.find(s => s.name === species);
             if (existingSpecies) {
@@ -62,69 +67,30 @@ app.data = {
             }
             this.searchQuery = '';
         },
+        //Function to increment the count of a species
         incCount: function(species) {
-            //console.log("increase")
             species.count++;
         },
+        //Function to decrement the count of a species
         decCount: function(species) {
             if (species.count > 0) {
-                //console.log("decrease")
                 species.count--;
             }
         },
+        //Function that returns the closest matches to the user's bird search input
         getClosestMatches: function(query) {
             if (!query) return [];
             let matches = this.species.filter(species => species.toLowerCase().includes(query.toLowerCase()));
             return matches;
         },
-        searchSpecies() {
-            if (this.selectedSpecies.trim() === '') {
-                this.species = [];
-                return;
-            }
-            axios.get('/BirdApp/search_species', { params: { query: this.selectedSpecies } })
-                .then(response => {
-                    this.species = response.data.species;
-                })
-                .catch(error => {
-                    console.error("There was an error searching for species:", error);
-                });
-        },
-        getCount(species_id) {
-            let item = this.checklist.find(item => item.species_id === species_id);
-            return item ? item.number_seen : 0;
-        },
-        addSpeciesToChecklist(species) {
-            if (!this.checklist.some(item => item.species_id === species.id)) {
-                this.checklist.push({ species_id: species.id, name: species.bird_name, number_seen: 0 });
-            }
-            this.selectedSpecies = '';
-            this.species = [];
-        },
-        // incrementCount(species_id) {
-        //     let item = this.checklist.find(item => item.species_id === species_id);
-        //     if (item) {
-        //         item.number_seen++;
-        //     } else {
-        //         this.checklist.push({ species_id, name: species_id, number_seen: 1 });
-        //     }
-        // },
+        //Function that allows user to submit their checklist
         submitChecklist() {
-            //console.log(app.vue.addedSpecies);
-            //console.log("Submitting checklist with data:", {
-                lat: this.lat,
-                lng: this.lng,
-                date: this.date,
-                duration: this.duration,
-                sightings: app.vue.addedSpecies,
-            });
-            
             if (this.lat.trim() === '' || this.lng.trim() === '' || this.date.trim() === '' || this.duration.trim() === '') {
                 alert('Please fill out all fields before submitting the checklist.');
                 return;
             }
-            
-            axios.post('/BirdApp/submit_checklist', {
+            //POST reqquest to submit the checklist
+            axios.post(submit_checklist_url, {
                 lat: this.lat,
                 lng: this.lng,
                 date: this.date,
@@ -147,51 +113,21 @@ app.data = {
                 alert('There was an error submitting the checklist. Please try again.');
             });
         },
-        loadMyChecklists() {
-            axios.get('/BirdApp/get_my_checklists')
-                .then(response => {
-                    this.myChecklists = response.data.checklists;
-                })
-                .catch(error => {
-                    console.error("There was an error fetching the checklists:", error);
-                });
-        },
-        viewMyChecklists() {
-            window.location.href = '/BirdApp/my_checklists';
-        }
 
+        //Function that redirects user to their checklists
+        viewMyChecklists() {
+            window.location.href = my_checklists_url;
+        }
     }
 };
-
-// Create the Vue instance and mount it to the DOM element with id="app"
-// app.vue = Vue.createApp({
-//     data() {
-//         return app.data;
-//     },
-//     methods: app.methods,
-//     mounted() {
-//         let params = getQueryParams();
-//         console.log("URL Parameters: ", params);
-//         if (params.lat && params.lng) {
-//             this.lat = params.lat;
-//             this.lng = params.lng;
-//             console.log("Latitude set to: ", this.lat);
-//             console.log("Longitude set to: ", this.lng);
-//         }
-//         // this.loadMyChecklists();
-//     }
-// }).mount('#app');
 app.vue = Vue.createApp(app.data).mount("#app");
 
 // Function to load initial data
 app.load_data = function () {
     let params = getQueryParams();
-        //console.log("URL Parameters: ", params);
         if (params.lat && params.lng) {
             app.vue.lat = params.lat;
             app.vue.lng = params.lng;
-            //console.log("Latitude set to: ", app.vue.lat);
-            //console.log("Longitude set to: ", app.vue.lng);
         }
     axios.get(get_species_url).then(function (r) {
         app.vue.species = r.data.species.map(function(bird) {
@@ -204,5 +140,5 @@ app.load_data = function () {
     });
 }
 
-// Load initial data (if needed)
+// Load initial data 
 app.load_data();

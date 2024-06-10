@@ -8,7 +8,6 @@ let app = {};
 app.data = {    
     data: function() {
         return {
-            // Complete as you see fit.
             map: null,
             my_value: 1,
             searchQuery: '',
@@ -17,9 +16,10 @@ app.data = {
             selected_bird: '',
             showMatches: false,
             heatmap_cords: [],
-             // This is an example.
         };
     },
+    //Function allowing to display closest matches to
+    // user's current input in search bar
     watch: {
         searchQuery: function(val) {
             this.closestMatches = this.getClosestMatches(val);
@@ -27,22 +27,21 @@ app.data = {
         }
     },
     methods: {
-        // Complete as you see fit.
-        my_function: function() {
-            // This is an example.
-            this.my_value += 1;
-        },
+        //Function allowing to redirect to the statistics page
         goToUserStats: function() {
             window.location.href = stats_url;
         },
+        //Function allowing to redirect to the checklist page
         goToMyChecklists: function() {
             window.location.href = my_checklists_url;
         },
+        //Function that returns the closest matches to the user's input
         getClosestMatches: function(query) {
             if (!query) return [];
             let matches = this.species.filter(species => species.toLowerCase().includes(query.toLowerCase()));
             return matches;
         },
+        //Function that allows to select a bird from the search bar
         select_bird: function(bird) {
             this.searchQuery = bird;
             this.$nextTick(() => {
@@ -64,21 +63,19 @@ app.data = {
                         event_ids: event_ids.join(',')
                     }
                 }).then((response2) => {
-                    //console.log(event_ids);
                     let heatmap_cords = response2.data.checklists.map(checklist => [checklist.lat, checklist.lng, 0.2]);
-                    console.log('Number of heatmap coordinates:', heatmap_cords.length);
                     // Update heatmap
                     app.heatmap.setLatLngs(heatmap_cords);
                 });
             });
         },
+        //Function that allows to clear the search bar and reset heatmap 
         redo: function() {
             // Get all checklists
             axios.get(get_checklists_url).then((response) => {
                 let heatmap_cords = response.data.checklists.map(checklist => [checklist.lat, checklist.lng, 0.2]);
                 // Update heatmap
                 app.heatmap.setLatLngs(heatmap_cords);
-                // Clear selected bird
             });
             this.searchQuery = '';
         },
@@ -87,13 +84,14 @@ app.data = {
 app.vue = Vue.createApp(app.data).mount("#app");
 
 app.load_data = function () {
+    //Load species data
     axios.get(get_species_url).then(function (r) {
         app.vue.species = r.data.species.map(function(bird) {
             return bird.bird_name;
         });
     });
 
-    //load data for heatmap
+    //Load data for heatmap
     axios.get(get_checklists_url).then(function (r) {
         app.vue.heatmap_cords = r.data.checklists.map(function(checklist) {
             return [checklist.lat, checklist.lng, 0.2];
@@ -101,43 +99,22 @@ app.load_data = function () {
         app.heatmap.setLatLngs(app.vue.heatmap_cords);
     });
 
-    // ...rest of your code...
 }
 
-    // var map = L.map('map').setView([51.505, -0.09], 13);
-
-    // L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    //     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    // }).addTo(map);
-
-    // L.marker([51.5, -0.09]).addTo(map)
-    //     .bindPopup('A pretty CSS popup.<br> Easily customizable.')
-    //     .openPopup();
-        
-
-
-    app.init = () => {
-        app.map = L.map('map');
-        // Add loading screen to map, wait for map to initialize and load
-        app.map.on('load', function() {
-            document.getElementById('loading').style.display = 'none';
-        });
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-            subdomains: 'abcd',
-            maxZoom: 19
-        }).addTo(app.map);
-
-        
-    // Adds listener.
-    // app.map.on('click', app.click_listener);
-    // app.map.on('dbclick', app.dbclick_listener);
-
+app.init = () => {
+    app.map = L.map('map');
+    // Add loading screen to map, wait for map to initialize and load map
+    app.map.on('load', function() {
+        document.getElementById('loading').style.display = 'none';
+    });
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        subdomains: 'abcd',
+        maxZoom: 19
+    }).addTo(app.map);
     app.map.locate({setView: true, maxZoom: 13});
 
     app.map.on('locationfound', function(e){
-        // L.marker(e.latlng).addTo(app.map)
-            // .bindPopup("You are located here!").openPopup();
     });
     app.map.on('locationerror', function(e){
         alert(e.message);
@@ -181,11 +158,12 @@ app.load_data = function () {
         return div;
     };
     
+    // Add the control to the map
     locateControl.addTo(app.map);
     app.map.on('draw:created', function(e) {
         var type = e.layerType,
-            layer = e.layer;
-    
+            layer = e.layer;  
+        //Drawing a rectangle on map
         if (type === 'rectangle') {
             var popupContent = '<button class="button"id="stats-button">Statistics on region</button>';
             var popup = L.popup().setContent(popupContent);
@@ -195,6 +173,7 @@ app.load_data = function () {
                 document.getElementById('stats-button').layer = layer;
             });
         }
+        //Placing a marker on map
         if (type === "marker") {
             var popupContent = '<button class="button"id="checklist">Enter checklist</button>';
             var popup = L.popup().setContent(popupContent);
@@ -224,21 +203,13 @@ document.addEventListener('click', function(e) {
         if (layer) {
             // Get the bounds of the rectangle
             var bounds = layer.getBounds();
-            // Get the south-west and north-east points of the bounds
+            // Get the coordinates of the corners of the rectangle
             var southWest = bounds.getSouthWest();
             var northEast = bounds.getNorthEast();
             var northWest = bounds.getNorthWest();
             var southEast = bounds.getSouthEast();
 
-            // Log the latitude and longitude data
-            //console.log('South-west point:', southWest.lat, southWest.lng);
-            //console.log('North-east point:', northEast.lat, northEast.lng);
-            //console.log('North-west point:', northWest.lat, northWest.lng);
-            //console.log('South-east point:', southEast.lat, southEast.lng);
-            // Perform an action with the latitude and longitude data
-            // ...
-
-            //redirect
+            // Redirect to location page with the coordinates as parameters
             window.location.href = '/BirdApp/location?' +
                 'swLat=' + southWest.lat + '&swLng=' + southWest.lng +
                 '&nwLat=' + northWest.lat + '&nwLng=' + northWest.lng +

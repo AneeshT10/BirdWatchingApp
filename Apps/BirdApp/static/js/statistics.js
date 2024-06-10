@@ -20,18 +20,21 @@ app.data = {
         };
     },
     computed: {
+        // Filter the species list based on the user's searches
         filteredSpecies() {
             const query = this.searchQuery.toLowerCase();
             return this.speciesList.filter(species =>
                 species.common_name && species.common_name.toLowerCase().includes(query)
             );
         },
+        // Filter the sightings based on the species searched by the user
         speciesSightings() {
             if (!this.selectedSpecies) return [];
             return this.sightingsOverTime.filter(sighting =>
                 sighting.sightings.common_name === this.selectedSpecies
             );
         },
+        // Function to help calculate and display the user's overall sightings over time
         overallSightings() {
             // Group data by date and sum the counts
             const grouped = this.sightingsOverTime.reduce((acc, sighting) => {
@@ -59,10 +62,6 @@ app.data = {
     },
     methods: {
         loadData() {
-
-            
-            
-            
             // Replace single quotes with double quotes and parse the JSON string
             let speciesJsonString = species_seen.replace(/(\W)'|'(\W)/g, '$1"$2');
             this.speciesList = JSON.parse(speciesJsonString);
@@ -80,10 +79,6 @@ app.data = {
             let locationsJsonString = sighting_locations.replace(/(\W)'|'(\W)/g, '$1"$2');
             this.sightingLocations = JSON.parse(locationsJsonString);
 
-            //console.log("Loaded Species List:", this.speciesList);
-            //console.log("Loaded Sightings Over Time:", this.sightingsOverTime);
-            //console.log("Loaded Sighting Locations:", this.sightingLocations);
-
             // Visualize overall data
             this.visualizeOverallTime();
 
@@ -94,14 +89,13 @@ app.data = {
                 }
             }
 
+            // Get total hours bird watched
             axios.get(total_hours_url)
             .then(response => {
                 this.totalHoursBirdWatched = response.data.total_hours;
             })
-
-            console.log(this.numberOfSightings, this.mostSeenBird);
-
         },
+        // Function to select a species and display its graph and mini-map
         selectSpecies(speciesName) {
             if (this.selectedSpecies == speciesName){
                 this.selectedSpecies = '';
@@ -116,13 +110,13 @@ app.data = {
                     // If there are no sightings of the selected species, return
                     
                     // Set the map's view to the location of the first sighting
-                    
                     this.visualizeTime();
                     this.visualizeHeatmap();
                     this.map.setView([sightingsOfSelectedSpecies[0].checklists.lat, sightingsOfSelectedSpecies[0].checklists.lng], 13)
                 });
             }
         },
+        // Function to visualize the overall sightings over time
         visualizeOverallTime() {
             const timeVisualization = document.getElementById('overall-time-visualization');
             if (!timeVisualization) {
@@ -200,6 +194,7 @@ app.data = {
                 .attr("r", 3)
                 .attr("fill", "#69b3a2");
         },
+        // Function to visualize the sightings of a species over time
         visualizeTime() {
             const timeVisualization = document.getElementById('time-visualization');
             if (!timeVisualization) {
@@ -228,14 +223,6 @@ app.data = {
                 .attr("height", height + margin.top + margin.bottom)
                 .append("g")
                 .attr("transform", `translate(${margin.left},${margin.top})`);
-            // // Add X axis
-            // const x = d3.scaleTime()
-            // .domain(d3.extent(data, d => d.date))
-            // .range([0, width]);
-            // svg.append("g")
-            // .attr("transform", `translate(0,${height})`)
-            // .call(d3.axisBottom(x));
-
             // Add Y axis
             const y = d3.scaleLinear()
             .domain([0, d3.max(data, d => d.count)])
@@ -273,11 +260,10 @@ app.data = {
             .text("Date Seen");
 
             // Calculate bar width
-            // Calculate bar width
             const maxBarWidth = 30; // Set your desired maximum bar width here
             const barWidth = Math.min(x.bandwidth(), maxBarWidth); // get the minimum of the bandwidth and the maximum bar width
-            //const barWidth = x.bandwidth(); // get the width of the bars from the x scale
 
+            //Add the bars
             svg.selectAll("rect")
             .data(data)
             .enter()
@@ -289,6 +275,7 @@ app.data = {
             .attr("fill", "rgba(70, 130, 180, 0.5)"); // use rgba color format to specify opacity
             
         },
+        // Function to visualize the heatmap of sightings of a species
         visualizeHeatmap() {
             const mapElement = document.getElementById('map');
             if (!mapElement) {

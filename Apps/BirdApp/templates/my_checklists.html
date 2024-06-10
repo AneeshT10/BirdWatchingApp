@@ -59,5 +59,10 @@
     
     [[block page_scripts]]
 <script src="https://unpkg.com/vue@next"></script>
+<script>
+    let get_my_checklists_url = "[[=XML(get_my_checklists_url)]]";
+    let get_birds_by_event_url = "[[=XML(get_birds_by_event_url)]]";
+    let delete_checklist_url = "[[=XML(delete_checklist_url)]]";
+</script>
 <script src="js/my_checklists.js"></script>
 [[end]]

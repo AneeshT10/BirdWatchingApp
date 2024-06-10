@@ -10,8 +10,9 @@ app.data = {
 };
 
 app.methods = {
+    // Function to get the birds for a specific event
     getBirdsByEvent: function(sampling_event_id) {
-        return axios.post('/BirdApp/get_birds_by_event', { sampling_event_id: sampling_event_id })
+        return axios.post(get_birds_by_event_url, { sampling_event_id: sampling_event_id })
             .then(response => {
                 if (response.data.status === 'success') {
                     return response.data.bird_counts;
@@ -23,6 +24,7 @@ app.methods = {
                 console.error("There was an error fetching the birds:", error);
             });
     },
+    // Function to initialize a mini-map for each checklist
     initMap: function(checklist) {
         //console.log('initMap', checklist.id, checklist.lat, checklist.lng)
         var map = L.map('map' + checklist.id).setView([checklist.lat, checklist.lng], 11);
@@ -33,8 +35,9 @@ app.methods = {
 
         L.marker([checklist.lat, checklist.lng]).addTo(map);
     },
+    //Load checklists
     loadChecklists() {
-        axios.get('/BirdApp/get_my_checklists')
+        axios.get(get_my_checklists_url)
             .then(response => {
                 // Sort the checklists by date
                 this.checklists = response.data.checklists.sort((a, b) => {
@@ -55,10 +58,10 @@ app.methods = {
             .catch(error => {
                 console.error("There was an error fetching the checklists:", error);
             });
-        //console.log("Checklist", this.checklists)
     },
+    // Function to delete a checklist
     deleteChecklist(id) {
-        axios.post('/BirdApp/delete_checklist', { id: id })
+        axios.post(delete_checklist_url, { id: id })
             .then(response => {
                 if (response.data.status === 'success') {
                     this.loadChecklists();

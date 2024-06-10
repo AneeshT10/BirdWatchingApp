@@ -17,6 +17,8 @@ app.data = {
             duration: ''
         };
     },
+    //Function allowing to display closest matches to
+    // user's current input in search bar
     watch: {
         searchQuery: function(val) {
             if (val.length > 0) {
@@ -28,6 +30,7 @@ app.data = {
         }
     },
     methods: {
+        //Function to load the checklist
         loadChecklist: function() {
             axios.get(load_checklist_url)
                 .then(response => {
@@ -49,6 +52,7 @@ app.data = {
                     console.error('Error loading checklist:', error);
                 });
         },
+        //Function allowing to display closest matches to user bird search input
         searchSpecies: function() {
             axios.get(find_species_url, { params: { query: this.searchQuery } })
                 .then(response => {
@@ -59,6 +63,7 @@ app.data = {
                     console.error('Error searching species:', error);
                 });
         },
+        //Function allowing to add a species to the checklist
         addSpecies: function(species) {
             if (!this.addedSpecies.some(s => s.name === species)) {
                 this.addedSpecies.push({ id: null, name: species, count: 1 });
@@ -66,17 +71,21 @@ app.data = {
             this.searchQuery = '';
             this.showMatches = false;
         },
+        //Function to increment the count of a species
         incCount: function(species) {
             species.count++;
         },
+        //Function to decrement the count of a species
         decCount: function(species) {
             if (species.count > 0) {
                 species.count--;
             }
         },
+        //Function to delete a species from the checklist
         deleteSpecies: function(species) {
             this.addedSpecies = this.addedSpecies.filter(s => s !== species);
         },
+        //Function to update and submit the changed checklist
         updateChecklist: function() {
             const data = {
                 checklist: {
@@ -93,7 +102,7 @@ app.data = {
             axios.post(update_checklist_url, { checklist_id: checklist_id, data: data })
                 .then(response => {
                     if (response.data.success) {
-                        window.location.href = '/BirdApp/my_checklists';
+                        window.location.href = my_checklist_url;
                     } else {
                         alert('Failed to update checklist');
                     }
@@ -102,9 +111,11 @@ app.data = {
                     console.error('Error updating checklist:', error);
                 });
         },
+        //Function that redirects user to their checklists
         viewMyChecklists: function() {
-            window.location.href = '/BirdApp/my_checklists';
+            window.location.href = my_checklist_url;
         },
+        //Function to check if the input is a float
         checkFloat: function(event) {
             let value = event.target.value;
             if (!/^\d*\.?\d*$/.test(value)) {

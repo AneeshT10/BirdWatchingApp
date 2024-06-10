@@ -53,16 +53,13 @@ def index():
 @action('statistics')
 @action.uses('statistics.html', db, auth.user, url_signer)
 def statistics():
-
     user_email = get_user_email()
-
     # Fetch species seen by the user
     species_seen = db(db.checklists.observer_id == user_email).select(
         db.sightings.common_name,
         distinct=True,
         join=db.sightings.on(db.sightings.sampling_event_id == db.checklists.sampling_event_id)
     )
-
     # Fetch sightings over time
     sightings_over_time = db(db.checklists.observer_id == user_email).select(
         db.checklists.observation_date,
@@ -132,7 +129,6 @@ def location():
 
     # Convert species_stats_list to JSON
     species_stats_json = json.dumps(species_stats_list)
-    print(species_stats_json)
     return dict(location_url = URL('location', signer=url_signer), 
                 get_sightings_url = URL('get_sightings', signer=url_signer),
                 get_checklists_url = URL('get_checklists', signer=url_signer),
@@ -145,7 +141,9 @@ def checklist():
         # COMPLETE: return here any signed URLs you need.
         my_callback_url = URL('my_callback', signer=url_signer),
         get_species_url = URL('get_species', signer=url_signer),
-
+        submit_checklist_url = URL('submit_checklist', signer=url_signer),
+        search_species_url = URL('search_species', signer=url_signer),
+        my_checklists_url = URL('my_checklists', signer=url_signer),
     )
 
 @action('my_callback')
@@ -204,7 +202,6 @@ def get_checklists():
 
     else:
         checklists = db(db.checklists).select().as_list()
-    #print("LENGTH OF CHECK",len(checklists))
     return dict(checklists=checklists)
 
 @action('search_species', method=['GET'])
@@ -236,7 +233,6 @@ def submit_checklist():
         db(db.checklists.id == checklist_id).update(sampling_event_id=checklist_id)
 
         for sighting in data['sightings']:
-            #print("Inserting sighting:", sighting)
             db.sightings.insert(
                 sampling_event_id=checklist_id, 
                 common_name=sighting['name'], 
@@ -251,14 +247,17 @@ def submit_checklist():
 @action.uses(db, auth.user)
 def get_my_checklists():
     user_id = auth.current_user['email']
-    print("Fetching checklists for user:", user_id)
     checklists = db(db.checklists.observer_id == user_id).select().as_list()
     return dict(checklists=checklists)
 
 @action('my_checklists')
 @action.uses('my_checklists.html', db, auth.user)
 def my_checklists():
-    return dict()
+    return dict(
+        get_my_checklists_url=URL('get_my_checklists'),
+        get_birds_by_event_url=URL('get_birds_by_event'),
+        delete_checklist_url=URL('delete_checklist'),
+    )
 
 @action('delete_checklist', method=['POST'])
 @action.uses(db, auth.user)
@@ -288,7 +287,8 @@ def edit_checklist():
         checklist_id=checklist_id,
         get_species_url=URL('get_species'),
         load_checklist_url=URL('load_checklist', checklist_id),
-        update_checklist_url=URL('update_checklist')
+        update_checklist_url=URL('update_checklist'),
+        my_checklists_url = URL('my_checklists', signer=url_signer)
     )
 
 
@@ -300,7 +300,6 @@ def get_birds_by_event():
         data = request.json
         sampling_event_id = data.get('sampling_event_id')
         birds = db(db.sightings.sampling_event_id == sampling_event_id).select()
-        print(birds)
         bird_counts = {bird.common_name: bird.observation_count for bird in birds}
         return dict(status='success', bird_counts=bird_counts)
     except Exception as e:
@@ -350,8 +349,6 @@ def update_checklist():
 
         return dict(success=True)
     return dict(success=False, error="Invalid data")
-
-
 
 @action('find_species', method='GET')
 @action.uses(db)
