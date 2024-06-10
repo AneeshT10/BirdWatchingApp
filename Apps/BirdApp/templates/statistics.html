@@ -43,45 +43,58 @@
   .chart {
     margin-top: 20px;
   }
+
   .columns {
     display: flex;
     justify-content: space-between;
   }
 
   .column {
-    flex: 1 0 0; /* This will make sure all columns have the same width */
-    box-sizing: border-box; /* Include padding and border in the column's width */
+    flex: 1 0 0;
+    /* This will make sure all columns have the same width */
+    box-sizing: border-box;
+    /* Include padding and border in the column's width */
   }
+
   .stat-box {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    border-radius: 10px; /* Make the box rounded */
-    padding: 20px; /* Add padding */
-    margin: 10px; /* Add margin */
-}
+    border-radius: 10px;
+    /* Make the box rounded */
+    padding: 20px;
+    /* Add padding */
+    margin: 10px;
+    /* Add margin */
+  }
+
   .chart-container {
     display: flex;
     justify-content: center;
   }
+
   .box h2.subtitle {
     text-align: center;
   }
+
   .st {
     font-size: 1rem;
   }
+
   .stat {
     font-size: 2rem;
     font-weight: bold;
-    color: rgb(37, 78, 173); 
-}
-.stat2 {
+    color: rgb(37, 78, 173);
+  }
+
+  .stat2 {
     font-size: 1.5rem;
     font-weight: bold;
-    color: rgb(37, 78, 173); 
-}
+    color: rgb(37, 78, 173);
+  }
+
   #map {
     height: 400px;
     margin-top: 20px;
@@ -96,15 +109,15 @@
     <div class="columns">
       <div class="column stat-box">
         <h2 class="subtitle st">Number of Sightings</h2>
-        <p class ="stat">{{ numberOfSightings }}</p>
+        <p class="stat">{{ numberOfSightings }}</p>
       </div>
       <div class="column stat-box">
         <h2 class="subtitle st">Total Minutes Bird Watched </h2>
-        <p class ="stat">{{ totalHoursBirdWatched }}</p>
+        <p class="stat">{{ totalHoursBirdWatched }}</p>
       </div>
       <div class="column stat-box">
         <h2 class="subtitle st">Most Seen Bird</h2>
-        <p class ="stat2">{{ mostSeenBird }}</p>
+        <p class="stat2">{{ mostSeenBird }}</p>
       </div>
     </div>
 
@@ -117,10 +130,16 @@
     <div class="field">
       <div class="control">
         <input class="input" type="text" placeholder="Search for a species" v-model="searchQuery">
+        <div class="select">
+          <select v-model="sortBy">
+            <option value="first-seen">First Seen</option>
+            <option value="most-recently-seen">Most Recently Seen</option>
+          </select>
+        </div>
       </div>
     </div>
     <div class="list is-hoverable">
-      <a v-for="species in filteredSpecies" :key="species.common_name" @click="selectSpecies(species.common_name)"
+      <a v-for="species in sortedSpeciesList" :key="species.common_name" @click="selectSpecies(species.common_name)"
         class="list-item">
         {{ species.common_name }}
       </a>

@@ -17,6 +17,7 @@ app.data = {
             numberOfSightings: 0,
             totalHoursBirdWatched: 0.0,
             mostSeenBird: '',
+            sortBy: 'first-seen',  // New data property for sorting
         };
     },
     computed: {
@@ -58,7 +59,21 @@ app.data = {
                 cumulativeCount += d.count;
                 return { date: d.date, count: cumulativeCount };
             });
-        }
+        },
+        sortedSpeciesList() {
+            return this.filteredSpecies.sort((a, b) => {
+                const firstSightingA = this.sightingsOverTime.find(s => s.sightings.common_name === a.common_name)?.checklists.observation_date;
+                const firstSightingB = this.sightingsOverTime.find(s => s.sightings.common_name === b.common_name)?.checklists.observation_date;
+                const lastSightingA = [...this.sightingsOverTime].reverse().find(s => s.sightings.common_name === a.common_name)?.checklists.observation_date;
+                const lastSightingB = [...this.sightingsOverTime].reverse().find(s => s.sightings.common_name === b.common_name)?.checklists.observation_date;
+
+                if (this.sortBy === 'first-seen') {
+                    return new Date(firstSightingA) - new Date(firstSightingB);
+                } else if (this.sortBy === 'most-recently-seen') {
+                    return new Date(lastSightingB) - new Date(lastSightingA);
+                }
+            });
+        },
     },
     methods: {
         loadData() {
@@ -82,33 +97,33 @@ app.data = {
             // Visualize overall data
             this.visualizeOverallTime();
 
-            for(let i = 0; i < this.sightingsOverTime.length; i++){
+            for (let i = 0; i < this.sightingsOverTime.length; i++) {
                 this.numberOfSightings += this.sightingsOverTime[i].sightings.observation_count;
-                if(this.sightingsOverTime[i].sightings.observation_count > this.mostSeenBird){
+                if (this.sightingsOverTime[i].sightings.observation_count > this.mostSeenBird) {
                     this.mostSeenBird = this.sightingsOverTime[i].sightings.common_name;
                 }
             }
 
             // Get total hours bird watched
             axios.get(total_hours_url)
-            .then(response => {
-                this.totalHoursBirdWatched = response.data.total_hours;
-            })
+                .then(response => {
+                    this.totalHoursBirdWatched = response.data.total_hours;
+                })
         },
         // Function to select a species and display its graph and mini-map
         selectSpecies(speciesName) {
-            if (this.selectedSpecies == speciesName){
+            if (this.selectedSpecies == speciesName) {
                 this.selectedSpecies = '';
             }
-            else{
+            else {
                 this.selectedSpecies = speciesName;
                 this.$nextTick(() => {
                     // Filter the sightings for the selected species
                     const sightingsOfSelectedSpecies = this.sightingLocations
                         .filter(sighting => sighting.sightings.common_name === this.selectedSpecies);
-                    
+
                     // If there are no sightings of the selected species, return
-                    
+
                     // Set the map's view to the location of the first sighting
                     this.visualizeTime();
                     this.visualizeHeatmap();
@@ -152,9 +167,9 @@ app.data = {
                 .call(d3.axisBottom(x));
             // Add x-axis label
             svg.append("text")
-            .attr("transform", `translate(${width / 2},${height + margin.top + 30})`)
-            .style("text-anchor", "middle")
-            .text("Date");
+                .attr("transform", `translate(${width / 2},${height + margin.top + 30})`)
+                .style("text-anchor", "middle")
+                .text("Date");
 
             // Add Y axis
             const y = d3.scaleLinear()
@@ -162,15 +177,15 @@ app.data = {
                 .range([height, 0]);
             svg.append("g")
                 .call(d3.axisLeft(y));
-            
+
             // Add y-axis label
             svg.append("text")
-            .attr("transform", "rotate(-90)")
-            .attr("y", 0 - margin.left)
-            .attr("x",0 - (height / 2))
-            .attr("dy", "1em")
-            .style("text-anchor", "middle")
-            .text("Number of bird sightings");
+                .attr("transform", "rotate(-90)")
+                .attr("y", 0 - margin.left)
+                .attr("x", 0 - (height / 2))
+                .attr("dy", "1em")
+                .style("text-anchor", "middle")
+                .text("Number of bird sightings");
 
             // Add the line
             svg.append("path")
@@ -225,18 +240,18 @@ app.data = {
                 .attr("transform", `translate(${margin.left},${margin.top})`);
             // Add Y axis
             const y = d3.scaleLinear()
-            .domain([0, d3.max(data, d => d.count)])
-            .range([height, 0]);
+                .domain([0, d3.max(data, d => d.count)])
+                .range([height, 0]);
             svg.append("g")
-            .call(d3.axisLeft(y));
+                .call(d3.axisLeft(y));
             svg.append("g")
-            .call(d3.axisLeft(y));
+                .call(d3.axisLeft(y));
 
             // Add y-axis label
             svg.append("text")
                 .attr("transform", "rotate(-90)")
                 .attr("y", 0 - margin.left)
-                .attr("x",0 - (height / 2))
+                .attr("x", 0 - (height / 2))
                 .attr("dy", "1em")
                 .style("text-anchor", "middle")
                 .text("Number of bird sightings");
@@ -246,18 +261,18 @@ app.data = {
 
             // Add X axis
             const x = d3.scaleBand()
-            .domain(dates)
-            .range([0, width])
-            .padding(0.2); // this adds some space between bars
+                .domain(dates)
+                .range([0, width])
+                .padding(0.2); // this adds some space between bars
             svg.append("g")
-            .attr("transform", `translate(0,${height})`)
-            .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%Y-%m-%d"))); // format the date
+                .attr("transform", `translate(0,${height})`)
+                .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%Y-%m-%d"))); // format the date
 
             // Add x-axis label
             svg.append("text")
-            .attr("transform", `translate(${width / 2},${height + margin.top + 30})`)
-            .style("text-anchor", "middle")
-            .text("Date Seen");
+                .attr("transform", `translate(${width / 2},${height + margin.top + 30})`)
+                .style("text-anchor", "middle")
+                .text("Date Seen");
 
             // Calculate bar width
             const maxBarWidth = 30; // Set your desired maximum bar width here
@@ -265,15 +280,15 @@ app.data = {
 
             //Add the bars
             svg.selectAll("rect")
-            .data(data)
-            .enter()
-            .append("rect")
-            .attr("x", d => x(d.date) + (x.bandwidth() - barWidth) / 2) // center the bars within their bands
-            .attr("y", d => y(d.count))
-            .attr("width", barWidth)
-            .attr("height", d => height - y(d.count))
-            .attr("fill", "rgba(70, 130, 180, 0.5)"); // use rgba color format to specify opacity
-            
+                .data(data)
+                .enter()
+                .append("rect")
+                .attr("x", d => x(d.date) + (x.bandwidth() - barWidth) / 2) // center the bars within their bands
+                .attr("y", d => y(d.count))
+                .attr("width", barWidth)
+                .attr("height", d => height - y(d.count))
+                .attr("fill", "rgba(70, 130, 180, 0.5)"); // use rgba color format to specify opacity
+
         },
         // Function to visualize the heatmap of sightings of a species
         visualizeHeatmap() {
@@ -289,8 +304,6 @@ app.data = {
 
             // Create a map centered at a default location
             this.map = L.map('map').setView([37.7749, -122.4194], 10);
-
-
 
             // Add a tile layer
             L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}{r}.png', {
