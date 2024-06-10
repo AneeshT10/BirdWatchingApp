@@ -48,7 +48,9 @@
             <tbody>
                 <tr v-for="species in addedSpecies" :key="species.id">
                     <td>{{ species.name }}</td>
-                    <td>{{ species.count }}</td>
+                    <td>
+                        <input class ="small-input" type="number" v-model="species.count" min="0">
+                    </td>
                     <td>
                         <button class="button is-small" @click="incCount(species)">+</button>
                         <button class="button is-small" @click="decCount(species)">-</button> &nbsp

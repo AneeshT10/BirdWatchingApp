@@ -8,6 +8,9 @@
     background-color: rgb(87, 87, 87) !important;
     margin-bottom: 10px;
 }
+.small-input {
+    width: 50px;
+}
 </style>
 
 <div class="section" id="app" v-cloak>
@@ -51,7 +54,9 @@
             <tbody>
                 <tr v-for="species in addedSpecies">
                     <td>{{ species.name }}</td>
-                    <td>{{ species.count }}</td>
+                    <td>
+                        <input class ="small-input" type="number" v-model="species.count" min="0">
+                    </td>
                     <td>
                         <button class="button is-small" @click="incCount(species)">+</button>
                         <button class="button is-small" @click="decCount(species)">-</button> &nbsp

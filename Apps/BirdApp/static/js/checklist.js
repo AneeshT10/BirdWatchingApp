@@ -110,8 +110,8 @@ app.data = {
         //     }
         // },
         submitChecklist() {
-            console.log(app.vue.addedSpecies);
-            console.log("Submitting checklist with data:", {
+            //console.log(app.vue.addedSpecies);
+            //console.log("Submitting checklist with data:", {
                 lat: this.lat,
                 lng: this.lng,
                 date: this.date,
@@ -186,12 +186,12 @@ app.vue = Vue.createApp(app.data).mount("#app");
 // Function to load initial data
 app.load_data = function () {
     let params = getQueryParams();
-        console.log("URL Parameters: ", params);
+        //console.log("URL Parameters: ", params);
         if (params.lat && params.lng) {
             app.vue.lat = params.lat;
             app.vue.lng = params.lng;
-            console.log("Latitude set to: ", app.vue.lat);
-            console.log("Longitude set to: ", app.vue.lng);
+            //console.log("Latitude set to: ", app.vue.lat);
+            //console.log("Longitude set to: ", app.vue.lng);
         }
     axios.get(get_species_url).then(function (r) {
         app.vue.species = r.data.species.map(function(bird) {

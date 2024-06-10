@@ -24,7 +24,7 @@ app.methods = {
             });
     },
     initMap: function(checklist) {
-        console.log('initMap', checklist.id, checklist.lat, checklist.lng)
+        //console.log('initMap', checklist.id, checklist.lat, checklist.lng)
         var map = L.map('map' + checklist.id).setView([checklist.lat, checklist.lng], 11);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}{r}.png', {
             subdomains: 'abcd',
@@ -55,7 +55,7 @@ app.methods = {
             .catch(error => {
                 console.error("There was an error fetching the checklists:", error);
             });
-        console.log("Checklist", this.checklists)
+        //console.log("Checklist", this.checklists)
     },
     deleteChecklist(id) {
         axios.post('/BirdApp/delete_checklist', { id: id })

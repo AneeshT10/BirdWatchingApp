@@ -20,16 +20,45 @@
 .tabletxt{
   font-family: 'Comfortaa', sans-serif;
 }
-
+.stat-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px; /* Make the box rounded */
+    padding: 1.5rem; /* Add padding */
+    margin: 1.5rem; /* Add margin */
+}
+.st {
+    font-size: 1rem;
+}
+.stat {
+    font-size: 2rem;
+    font-weight: bold;
+    color: rgb(37, 78, 173); 
+}
+.stat2 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: rgb(37, 78, 173); 
+}
 </style>
 
 
 <div class="section tabletxt" id="app" v-cloak>
   <h1 class="title">Statistics on Selected Region</h1>
+  <div class="columns">
+    <div class="column stat-box">
+      <h2 class="subtitle st">Most Seen Bird</h2>
+      <p class ="stat2">{{ mostSeenBird }}</p>
+    </div>
+  </div>
+
   <table class="table is-fullwidth is-striped">
     <thead>
       <tr>
-        <th>Common Name</th>
+        <th>Species Name</th>
         <th>Checklist Count</th>
         <th>Total Sightings</th>
       </tr>
