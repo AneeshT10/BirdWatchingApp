@@ -18,7 +18,7 @@ function getQueryParams() {
 
 // Define the Vue data and methods
 app.data = {
-    data: function() {
+    data: function () {
         return {
             searchQuery: '',
             species: [],
@@ -38,27 +38,27 @@ app.data = {
     //Function allowing to display closest matches to
     // user's current input in search bar
     watch: {
-        searchQuery: function(val) {
+        searchQuery: function (val) {
             this.closestMatches = this.getClosestMatches(val);
             this.showMatches = true;
         }
     },
-    methods:{
+    methods: {
         //Check if the input is a float number
-        checkFloat: function(event) {
+        checkFloat: function (event) {
             if (!/^\d*\.?\d*$/.test(event.target.value)) {
                 this.duration = this.duration.slice(0, -1);
             }
         },
         //Function to delete species from a checklist
-        deleteSpecies: function(species) {
+        deleteSpecies: function (species) {
             const index = this.addedSpecies.indexOf(species);
             if (index !== -1) {
                 this.addedSpecies.splice(index, 1);
             }
         },
         //Function to add species to a checklist
-        addSpecies: function(species) {
+        addSpecies: function (species) {
             let existingSpecies = this.addedSpecies.find(s => s.name === species);
             if (existingSpecies) {
                 existingSpecies.count++;
@@ -68,17 +68,17 @@ app.data = {
             this.searchQuery = '';
         },
         //Function to increment the count of a species
-        incCount: function(species) {
+        incCount: function (species) {
             species.count++;
         },
         //Function to decrement the count of a species
-        decCount: function(species) {
+        decCount: function (species) {
             if (species.count > 0) {
                 species.count--;
             }
         },
         //Function that returns the closest matches to the user's bird search input
-        getClosestMatches: function(query) {
+        getClosestMatches: function (query) {
             if (!query) return [];
             let matches = this.species.filter(species => species.toLowerCase().includes(query.toLowerCase()));
             return matches;
@@ -100,8 +100,8 @@ app.data = {
                 if (response.data.status === 'success') {
                     alert('Checklist submitted successfully');
                     this.checklist = [];
-                    this.lat = '';
-                    this.lng = '';
+                    //this.lat = '';
+                    //this.lng = '';
                     this.date = '';
                     this.duration = '';
                     this.addedSpecies = [];
@@ -125,12 +125,12 @@ app.vue = Vue.createApp(app.data).mount("#app");
 // Function to load initial data
 app.load_data = function () {
     let params = getQueryParams();
-        if (params.lat && params.lng) {
-            app.vue.lat = params.lat;
-            app.vue.lng = params.lng;
-        }
+    if (params.lat && params.lng) {
+        app.vue.lat = params.lat;
+        app.vue.lng = params.lng;
+    }
     axios.get(get_species_url).then(function (r) {
-        app.vue.species = r.data.species.map(function(bird) {
+        app.vue.species = r.data.species.map(function (bird) {
             return bird.bird_name;
         });
     });
