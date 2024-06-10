@@ -72,9 +72,9 @@
 <script>
     let checklist_id = "[[=request.query.get('id')]]";
     let load_checklist_url = "[[=URL('load_checklist', request.query.get('id'))]]";
-    let update_checklist_url = "[[=URL('update_checklist')]]";
-    let find_species_url = "[[=URL('find_species')]]";
-    let my_checklists_url = "[[=URL('my_checklists')]]";
+    let update_checklist_url = "[[=XML(update_checklist_url)]]";
+    let find_species_url = "[[=XML(get_species_url)]]";
+    let my_checklist_url = "[[=XML(my_checklists_url)]]";
 </script>
 <script src="js/edit_checklist.js"></script>
 [[end]]
