@@ -31,8 +31,6 @@ from yatl.helpers import A
 from .common import db, session, T, cache, auth, logger, authenticated, unauthenticated, flash
 from py4web.utils.url_signer import URLSigner
 from .models import get_user_email, load_csv_files
-from py4web.utils.form import Form, FormStyleBulma
-from py4web.utils.grid import Grid, GridClassStyleBulma
 import json
 
 url_signer = URLSigner(session)
@@ -42,7 +40,6 @@ url_signer = URLSigner(session)
 def index():
     load_csv_files()
     return dict(
-        # COMPLETE: return here any signed URLs you need.
         my_callback_url = URL('my_callback', signer=url_signer),
         get_species_url = URL('get_species', signer=url_signer),
         get_checklists_url = URL('get_checklists', signer=url_signer),
@@ -50,6 +47,7 @@ def index():
         stats_url = URL('statistics', signer=url_signer),
         my_checklists_url = URL('my_checklists', signer=url_signer),
     )
+
 @action('statistics')
 @action.uses('statistics.html', db, auth.user, url_signer)
 def statistics():
@@ -91,7 +89,6 @@ def statistics():
     )
 
 @action('location')
-#@action('statistics?<swLat:float>&<swLng:float>&<nwLat:float>&<nwLng:float>&<neLat:float>&<neLng:float>&<seLat:float>&<seLng:float>')
 @action.uses('location.html', db, auth.user, url_signer, session)
 def location():
     #Loaded rectangle region
@@ -138,19 +135,11 @@ def location():
 @action.uses('checklist.html', db, auth.user, url_signer)
 def checklist():
     return dict(
-        # COMPLETE: return here any signed URLs you need.
-        my_callback_url = URL('my_callback', signer=url_signer),
         get_species_url = URL('get_species', signer=url_signer),
         submit_checklist_url = URL('submit_checklist', signer=url_signer),
         search_species_url = URL('search_species', signer=url_signer),
         my_checklists_url = URL('my_checklists', signer=url_signer),
     )
-
-@action('my_callback')
-@action.uses() # Add here things like db, auth, etc.
-def my_callback():
-    # The return value should be a dictionary that will be sent as JSON.
-    return dict(my_value=3)
 
 @action('get_species')
 def get_species():
@@ -187,7 +176,6 @@ def get_sightings():
             groupby=db.sightings.sampling_event_id,
             orderby=db.sightings.sampling_event_id
         ).as_list()
-
     else:
         sightings = db( (db.sightings.common_name == bird_name) & (db.sightings.observation_count > 0)).select().as_list()
     return dict(sightings=sightings)
@@ -290,8 +278,6 @@ def edit_checklist():
         update_checklist_url=URL('update_checklist'),
         my_checklists_url = URL('my_checklists', signer=url_signer)
     )
-
-
 
 @action('get_birds_by_event', method=["POST"])
 @action.uses(db, auth.user)

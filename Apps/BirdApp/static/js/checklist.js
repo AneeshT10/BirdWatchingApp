@@ -116,7 +116,7 @@ app.data = {
 
         //Function that redirects user to their checklists
         viewMyChecklists() {
-            window.location.href = my_checklists_url;
+            window.location.href = my_checklist_url;
         }
     }
 };
@@ -133,10 +133,6 @@ app.load_data = function () {
         app.vue.species = r.data.species.map(function (bird) {
             return bird.bird_name;
         });
-    });
-
-    axios.get(my_callback_url).then(function (r) {
-        app.vue.my_value = r.data.my_value;
     });
 }
 

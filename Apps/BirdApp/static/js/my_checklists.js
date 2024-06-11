@@ -26,7 +26,6 @@ app.methods = {
     },
     // Function to initialize a mini-map for each checklist
     initMap: function(checklist) {
-        //console.log('initMap', checklist.id, checklist.lat, checklist.lng)
         var map = L.map('map' + checklist.id).setView([checklist.lat, checklist.lng], 11);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}{r}.png', {
             subdomains: 'abcd',

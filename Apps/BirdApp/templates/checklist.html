@@ -35,7 +35,7 @@
         </div>
     </div>
     <div class="field ffont">
-        <label class="label">Duration</label>
+        <label class="label">Duration &#40; Minutes &#41; </label>
         <div class="control">
             <input class="input" type="text" v-model="duration" @input="checkFloat">
         </div>
@@ -76,7 +76,6 @@
 [[block page_scripts]]
 <script src="https://unpkg.com/vue@next"></script>
 <script>
-    let my_callback_url = "[[=URL('my_callback')]]";
     let get_species_url = "[[=XML(get_species_url)]]";
     let submit_checklist_url = "[[=XML(submit_checklist_url)]]";
     let search_species_url = "[[=XML(search_species_url)]]";

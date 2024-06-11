@@ -196,10 +196,8 @@ app.load_data();
 
 document.addEventListener('click', function(e) {
     if (e.target.id === 'stats-button') {
-        console.log("Button clicked");
         // Get the layer of the clicked button
         var layer = e.target.layer
-        console.log(layer);
         if (layer) {
             // Get the bounds of the rectangle
             var bounds = layer.getBounds();

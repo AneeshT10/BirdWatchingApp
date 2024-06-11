@@ -141,10 +141,6 @@ app.data = {
             timeVisualization.innerHTML = ''; // Clear previous content
 
             const data = this.overallSightings;
-
-            // Log data to ensure it's correctly transformed
-            console.log("Overall Sightings Data:", data);
-
             // Set the dimensions and margins of the graph
             const margin = { top: 10, right: 30, bottom: 40, left: 60 },
                 width = 800 - margin.left - margin.right,
@@ -222,10 +218,6 @@ app.data = {
                 date: new Date(sighting.checklists.observation_date),
                 count: sighting.sightings.observation_count,
             }));
-
-            // Log data to ensure it's correctly transformed
-            console.log("Species Sightings Data:", data);
-
             // Set the dimensions and margins of the graph
             const margin = { top: 10, right: 30, bottom: 40, left: 60 },
                 width = 800 - margin.left - margin.right,
@@ -325,10 +317,6 @@ app.data = {
                     }
                     return null;
                 }).filter(data => data !== null);
-
-            // Log heatmap data to ensure it's correctly transformed
-            console.log("Heatmap Data:", heatData);
-
             // Add a heatmap layer
             this.heatLayer = L.heatLayer(heatData, { radius: 25, blur: 15, maxZoom: 17 }).addTo(this.map);
         }

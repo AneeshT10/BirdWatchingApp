@@ -15,15 +15,7 @@ def get_user_email():
 def get_time():
     return datetime.datetime.utcnow()
 
-def load_csv_files():
-    print(os.getcwd())
-    #db(db.species).delete()
-    # # List all tables
-    # tables = db.species
-    
-    # # Drop each table
-    # for table in tables:
-    #     db[table].drop()
+def load_csv_files(): # Prime the database with the data from the csv files
     if db(db.species).isempty():
         with open('species.csv', 'r') as f:
             reader = csv.reader(f)
@@ -56,16 +48,11 @@ def load_csv_files():
                 if skip == 0:
                     skip += 1
                     continue
-                if row[6] is '':
+                if row[6] == '':
                     dur = 0.0
                 else:
                     dur = float(row[6])
                 db.checklists.insert(sampling_event_id=row[0], lat=float(row[1]), lng=float(row[2]), observation_date=row[3], observation_time=row[4], observer_id=row[5], duration=dur)
-
-### Define your table below
-# db.define_table('thing', Field('name'))
-#
-## always commit your models to avoid problems later
 
 db.define_table('species',
                 Field('bird_name', 'string')
@@ -85,6 +72,5 @@ db.define_table('checklists',
                 Field('duration','float')
 
 )
-
 
 db.commit()
